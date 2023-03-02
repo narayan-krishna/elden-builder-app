@@ -1,0 +1,48 @@
+how do we calculate a weapons ar?
+
+what are the item stats?
+ -> EquipParamWeapon(Raw_Data) table
+     - get the item stats
+     - get the reinforce type id
+         -> ReinforceParamWeapon multiplier
+             - look up id in the table
+     - multiply values to get new damage stats
+
+convert player stats to damage multipliers
+ -> CalcCorrectGraph
+     - get correct stat, grow, exponent values
+     - which row do we need?
+         -> CalcCorrectGraph id
+             - check what the values are look, up corresponding rows in CalcCorrectGraph
+             where values are id's
+
+check which stats are scaling with which damage types
+ use equipparamweapon to find the corresponding attack element correct id, which
+ will produce row
+
+ build a damage multipler per stat
+
+if weapon.physical_attack > 0.0 {
+    total_ar += weapon.physical_attack;
+
+    let calc_correct_graph: &Vec<f32> = calc_correct_graphs
+        .get(&calc_correct_ids[0])
+        .expect("failed to index calc_correct_ids");
+
+    for i in 0..5 {
+        let (weapon_scaling, stat) = match_index(i);
+
+        if attack_element_param[i] == 1 {
+            let calc_correct_value = calc_correct(stat, &calc_correct_graph);
+            let dmg =
+                dmg_type_per_stat(weapon.physical_attack, weapon_scaling, calc_correct_value);
+            println!("scaling {}: {}", i, dmg);
+            total_ar += dmg;
+        }
+    }
+}
+
+pub fn calculate(calc_correct: vec![], input_stat: i32) {
+    let ratio: f32 = (input_stat - stat_min) / (stat_max - stat_min);
+
+}
