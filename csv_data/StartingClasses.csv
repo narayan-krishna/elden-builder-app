@@ -1,0 +1,11 @@
+Name,Level,Vigor,Mind,Endurance,Strength,Dexterity,Intelligence,Faith,Arcane,Total
+Hero,7,14,9,12,16,9,7,8,11,86
+Bandit,5,10,11,10,9,13,9,8,14,84
+Astrologer,6,9,15,9,8,12,16,7,9,85
+Warrior,8,11,12,11,10,16,10,8,9,87
+Prisoner,9,11,12,11,11,14,14,6,9,88
+Confessor,10,10,13,10,12,12,9,14,9,89
+Wretch,1,10,10,10,10,10,10,10,10,80
+Vagabond,9,15,10,11,14,13,9,9,7,88
+Prophet,7,10,14,8,11,10,7,16,10,86
+Samurai,9,12,11,13,12,15,9,8,8,88

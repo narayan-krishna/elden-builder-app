@@ -157,19 +157,6 @@ mod tests {
     use super::*;
     use crate::ar_calculator;
 
-    // #[test]
-    // fn build_weapon() {
-    //     let weapon_1 = Weapon {
-    //         name: String::from("Ruins Greatsword"),
-    //         reinforce_param_id: 2000,
-    //         attack_element_correct_id: 100,
-    //         upgrade_lvl: 5,
-    //         stat_vals: ,
-    //         modifiers,
-    //         required_stats,
-    //     };
-    // }
-
     #[test]
     fn invalid_name() {
         let ruins_gs_0 = Weapon::from_data("fiaonwe", 0);
@@ -194,6 +181,7 @@ mod tests {
             intelligence: 40,
             faith: 10,
             arcane: 10,
+            class: StartingClassType::Hero,
         };
 
         let mut ruins_gs_5 = Weapon::from_data("Ruins Greatsword", 5).unwrap();
@@ -217,6 +205,7 @@ mod tests {
             intelligence: 40,
             faith: 10,
             arcane: 10,
+            class: StartingClassType::Hero,
         };
 
         let mut ruins_gs_5 = Weapon::from_data("Ruins Greatsword", 5).unwrap();

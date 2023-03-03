@@ -6,8 +6,9 @@ use std::error::Error;
 use std::path::Path;
 
 mod ar_calculator;
-mod weapon;
+mod optimizer;
 mod stats;
+mod weapon;
 
 pub enum Scaling {
     Str,
@@ -26,7 +27,8 @@ pub enum Attack {
     Stamina,
 }
 
-pub enum StartingClass {
+#[derive(Debug, Copy, Clone)]
+pub enum StartingClassType {
     Hero,
     Bandit,
     Astrologer,

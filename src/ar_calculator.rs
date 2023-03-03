@@ -2,9 +2,7 @@
 use super::*;
 
 /// query the csv to get the attack element parameters given id
-fn get_attack_element_param(
-    attack_element_correct_id: i32,
-) -> Result<Vec<i32>, Box<dyn Error>> {
+fn get_attack_element_param(attack_element_correct_id: i32) -> Result<Vec<i32>, Box<dyn Error>> {
     let path = Path::new("csv_data/AttackElementCorrectParam.csv");
     let mut rdr = csv::Reader::from_path(path)?;
 
@@ -179,13 +177,33 @@ fn dmg_type_per_stat(base_attack: f32, weapon_scaling: f32, calc_correct_result:
     base_attack * (weapon_scaling / 100.0) * (calc_correct_result / 100.0)
 }
 
-// TODO this should maybe return an error in certain cases
-/// return the weapon ar given the weapon and corresponding character statlist
-pub fn calculate_ar(weapon: &weapon::Weapon, statlist: &stats::StatList) -> Result<f32, Box<dyn Error>> {
-    let mut total_ar: f32 = 0.0;
+pub fn calculate_ar(
+    weapon: &weapon::Weapon,
+    statlist: &stats::StatList,
+) -> Result<f32, Box<dyn Error>> {
     let attack_element_param = get_attack_element_param(weapon.attack_element_correct_id)?;
     let calc_correct_ids = get_calc_correct_graph_ids(&weapon.name)?;
     let calc_correct_graphs = get_calc_correct_graphs(&calc_correct_ids)?;
+
+    calculate_ar_core(
+        weapon,
+        statlist,
+        &attack_element_param,
+        &calc_correct_ids,
+        &calc_correct_graphs,
+    )
+}
+
+// TODO this should maybe return an error in certain cases. better name?
+/// return the weapon ar given the weapon and corresponding character statlist
+pub fn calculate_ar_core(
+    weapon: &weapon::Weapon,
+    statlist: &stats::StatList,
+    attack_element_param: &Vec<i32>,
+    calc_correct_ids: &Vec<i32>,
+    calc_correct_graphs: &HashMap<i32, Vec<f32>>,
+) -> Result<f32, Box<dyn Error>> {
+    let mut total_ar: f32 = 0.0;
 
     for i in 0..5 {
         let current_attack_stat = match i {
@@ -232,8 +250,8 @@ pub fn calculate_ar(weapon: &weapon::Weapon, statlist: &stats::StatList) -> Resu
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::weapon::Weapon;
     use crate::stats::StatList;
+    use crate::weapon::Weapon;
 
     #[test]
     fn valid_get_attack_element_param() {
@@ -265,8 +283,19 @@ mod tests {
         let calc_correct_graph_ids = vec![0, 4, 0, 0, 4];
         let calc_correct_graph = get_calc_correct_graphs(&calc_correct_graph_ids).unwrap();
 
-        assert_eq!(calc_correct_graph.get(&0).unwrap(), &vec![1.0, 18.0, 60.0, 80.0, 150.0, 0.0, 25.0, 75.0, 90.0, 110.0, 1.2, -1.2, 1.0, 1.0, 1.0]);
-        assert_eq!(calc_correct_graph.get(&4).unwrap(), &vec![1.0, 20.0, 50.0, 80.0, 99.0, 0.0, 40.0, 80.0, 95.0, 100.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
+        assert_eq!(
+            calc_correct_graph.get(&0).unwrap(),
+            &vec![
+                1.0, 18.0, 60.0, 80.0, 150.0, 0.0, 25.0, 75.0, 90.0, 110.0, 1.2, -1.2, 1.0, 1.0,
+                1.0
+            ]
+        );
+        assert_eq!(
+            calc_correct_graph.get(&4).unwrap(),
+            &vec![
+                1.0, 20.0, 50.0, 80.0, 99.0, 0.0, 40.0, 80.0, 95.0, 100.0, 1.0, 1.0, 1.0, 1.0, 1.0
+            ]
+        );
     }
 
     #[test]
@@ -281,6 +310,7 @@ mod tests {
             intelligence: 40,
             faith: 10,
             arcane: 10,
+            class: StartingClassType::Hero,
         };
 
         let cold_dagger_5 = Weapon::from_data("Cold Dagger", 5).unwrap();
@@ -300,6 +330,7 @@ mod tests {
             intelligence: 40,
             faith: 10,
             arcane: 10,
+            class: StartingClassType::Hero,
         };
 
         let fire_flamberge_5 = Weapon::from_data("Fire Flamberge", 0).unwrap();
@@ -319,6 +350,7 @@ mod tests {
             intelligence: 40,
             faith: 10,
             arcane: 10,
+            class: StartingClassType::Hero,
         };
 
         let ruins_gs_0 = dbg!(Weapon::from_data("Ruins Greatsword", 0).unwrap());
