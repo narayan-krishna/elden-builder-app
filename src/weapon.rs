@@ -6,6 +6,7 @@ pub struct Weapon {
     pub upgrade_lvl: i32,
     pub reinforce_param_id: i32,
     pub attack_element_correct_id: i32,
+    pub max_upgrade: i32,
     stat_vals: Vec<f32>,
     modifiers: Vec<f32>,
     required_stats: Vec<i32>,
@@ -14,16 +15,20 @@ pub struct Weapon {
 impl Weapon {
     pub fn new(
         name: &str,
+        upgrade_lvl: i32,
         reinforce_param_id: i32,
+        attack_element_correct_id: i32,
+        max_upgrade: i32,
         stat_vals: Vec<f32>,
         modifiers: Vec<f32>,
         required_stats: Vec<i32>,
     ) -> Weapon {
         Weapon {
             name: name.to_string(),
-            upgrade_lvl: 0,
+            upgrade_lvl,
             reinforce_param_id,
-            attack_element_correct_id: 0,
+            attack_element_correct_id,
+            max_upgrade,
             stat_vals,
             modifiers,
             required_stats,
@@ -61,12 +66,22 @@ impl Weapon {
         }
     }
 
-    /// change the upgrade level of the weapon (indirectly changing the damage modifiers)
-    pub fn upgrade_weapon(&mut self, upgrade_lvl: i32) {
+    /// change the upgrade level of the weapon to given level (indirectly changing the damage modifiers)
+    pub fn upgrade_weapon(&mut self, upgrade_lvl: i32) -> Result<(), Box<dyn Error>> {
+        if upgrade_lvl > self.max_upgrade {
+            eprintln!("upgrade level is too high!");
+            return Err("the upgrade level entered exceeds the max upgrade level".into());
+        }
+
         self.upgrade_lvl = upgrade_lvl;
-        self.modifiers =
-            ar_calculator::get_reinforce_param_modifier(self.reinforce_param_id + upgrade_lvl)
-                .unwrap();
+
+        match ar_calculator::get_reinforce_param_modifier(self.reinforce_param_id + upgrade_lvl) {
+            Ok(modifiers) => {
+                self.modifiers = modifiers;
+                Ok(())
+            }
+            Err(e) => Err(e),
+        }
     }
 
     /// build a weapon from the raw weapon data, given a name
@@ -79,11 +94,13 @@ impl Weapon {
         let name_pos = 1;
         let reinforce_param_pos = 2;
         let attack_element_correct_id_pos = 26;
+        let max_upgrade_pos = 28;
         let stat_range = (3, 14);
         let required_stat_range = (29, 34);
 
         let mut reinforce_param_id = 0;
         let mut attack_element_correct_id = 0;
+        let mut max_upgrade = 0;
 
         for result in rdr.records() {
             let record = result?;
@@ -91,6 +108,7 @@ impl Weapon {
                 reinforce_param_id = record.get(reinforce_param_pos).unwrap().parse()?;
                 attack_element_correct_id =
                     record.get(attack_element_correct_id_pos).unwrap().parse()?;
+                max_upgrade = record.get(max_upgrade_pos).unwrap().parse()?;
                 stat_vals = (stat_range.0..stat_range.1)
                     .map(|i| {
                         record
@@ -123,12 +141,90 @@ impl Weapon {
 
         Ok(Weapon {
             name: weapon_name.to_string(),
+            upgrade_lvl,
             reinforce_param_id,
             attack_element_correct_id,
-            upgrade_lvl,
+            max_upgrade,
             stat_vals,
             modifiers,
             required_stats,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ar_calculator;
+
+    // #[test]
+    // fn build_weapon() {
+    //     let weapon_1 = Weapon {
+    //         name: String::from("Ruins Greatsword"),
+    //         reinforce_param_id: 2000,
+    //         attack_element_correct_id: 100,
+    //         upgrade_lvl: 5,
+    //         stat_vals: ,
+    //         modifiers,
+    //         required_stats,
+    //     };
+    // }
+
+    #[test]
+    fn invalid_name() {
+        let ruins_gs_0 = Weapon::build_from_data("fiaonwe", 0);
+        assert!(ruins_gs_0.is_err());
+    }
+
+    #[test]
+    fn invalid_upgrade_level() {
+        let ruins_gs_0 = Weapon::build_from_data("Ruins Greatsword", 12);
+        assert!(ruins_gs_0.is_err());
+    }
+
+    #[test]
+    fn invalid_weapon_upgrade_modification() {
+        let stats = StatList {
+            level: 10,
+            vigor: 10,
+            mind: 10,
+            endurance: 10,
+            strength: 50,
+            dexterity: 14,
+            intelligence: 40,
+            faith: 10,
+            arcane: 10,
+        };
+
+        let mut ruins_gs_5 = Weapon::build_from_data("Ruins Greatsword", 5).unwrap();
+        let ruins_gs_5_ar = ar_calculator::calculate_ar(&ruins_gs_5, &stats).unwrap();
+        assert_eq!(ruins_gs_5_ar, 487.0);
+
+        let upgrade = ruins_gs_5.upgrade_weapon(12);
+        assert!(upgrade.is_err());
+        assert_eq!(ruins_gs_5.upgrade_lvl, 5);
+    }
+
+    #[test]
+    fn valid_weapon_upgrade_modification() {
+        let stats = StatList {
+            level: 10,
+            vigor: 10,
+            mind: 10,
+            endurance: 10,
+            strength: 50,
+            dexterity: 14,
+            intelligence: 40,
+            faith: 10,
+            arcane: 10,
+        };
+
+        let mut ruins_gs_5 = Weapon::build_from_data("Ruins Greatsword", 5).unwrap();
+        let ruins_gs_5_ar = ar_calculator::calculate_ar(&ruins_gs_5, &stats).unwrap();
+        assert_eq!(ruins_gs_5_ar, 487.0);
+
+        ruins_gs_5.upgrade_weapon(10).unwrap();
+        let ruins_gs_10_ar = ar_calculator::calculate_ar(&ruins_gs_5, &stats).unwrap();
+        assert_eq!(ruins_gs_10_ar, 777.0);
     }
 }

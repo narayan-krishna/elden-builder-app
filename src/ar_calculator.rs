@@ -179,14 +179,13 @@ fn dmg_type_per_stat(base_attack: f32, weapon_scaling: f32, calc_correct_result:
     base_attack * (weapon_scaling / 100.0) * (calc_correct_result / 100.0)
 }
 
-
 // TODO this should maybe return an error in certain cases
 /// return the weapon ar given the weapon and corresponding character statlist
-pub fn calculate_ar(weapon: &weapon::Weapon, statlist: &StatList) -> f32 {
+pub fn calculate_ar(weapon: &weapon::Weapon, statlist: &StatList) -> Result<f32, Box<dyn Error>> {
     let mut total_ar: f32 = 0.0;
-    let attack_element_param = get_attack_element_param(weapon.attack_element_correct_id).unwrap();
-    let calc_correct_ids = get_calc_correct_graph_ids(&weapon.name).unwrap();
-    let calc_correct_graphs = get_calc_correct_graphs(&calc_correct_ids).unwrap();
+    let attack_element_param = get_attack_element_param(weapon.attack_element_correct_id)?;
+    let calc_correct_ids = get_calc_correct_graph_ids(&weapon.name)?;
+    let calc_correct_graphs = get_calc_correct_graphs(&calc_correct_ids)?;
 
     for i in 0..5 {
         let current_attack_stat = match i {
@@ -227,13 +226,47 @@ pub fn calculate_ar(weapon: &weapon::Weapon, statlist: &StatList) -> f32 {
         }
     }
 
-    total_ar.floor()
+    Ok(total_ar.floor())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::weapon::Weapon;
+
+    #[test]
+    fn valid_get_attack_element_param() {
+        let attack_element_param = get_attack_element_param(10013).unwrap();
+        assert_eq!(
+            attack_element_param,
+            vec![1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0]
+        );
+    }
+
+    #[test]
+    fn valid_get_reinforce_param_modifier() {
+        let reinforce_param_modifier = get_reinforce_param_modifier(402).unwrap();
+        assert_eq!(
+            reinforce_param_modifier,
+            vec![0.872, 0.872, 0.872, 0.872, 0.872, 1.08, 1.38, 0.56, 1.08, 1.08, 1.08]
+        )
+    }
+
+    #[test]
+    fn valid_get_calc_correct_graph_ids() {
+        let calc_correct_graph_ids =
+            get_calc_correct_graph_ids("Miquellan Knight's Sword").unwrap();
+        assert_eq!(calc_correct_graph_ids, vec![0, 4, 0, 0, 4]);
+    }
+
+    #[test]
+    fn valid_get_calc_correct_graphs() {
+        let calc_correct_graph_ids = vec![0, 4, 0, 0, 4];
+        let calc_correct_graph = get_calc_correct_graphs(&calc_correct_graph_ids).unwrap();
+
+        assert_eq!(calc_correct_graph.get(&0).unwrap(), &vec![1.0, 18.0, 60.0, 80.0, 150.0, 0.0, 25.0, 75.0, 90.0, 110.0, 1.2, -1.2, 1.0, 1.0, 1.0]);
+        assert_eq!(calc_correct_graph.get(&4).unwrap(), &vec![1.0, 20.0, 50.0, 80.0, 99.0, 0.0, 40.0, 80.0, 95.0, 100.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
+    }
 
     #[test]
     fn cold_dagger_5_ar() {
@@ -250,7 +283,7 @@ mod tests {
         };
 
         let cold_dagger_5 = Weapon::build_from_data("Cold Dagger", 5).unwrap();
-        let cold_dagger_ar = calculate_ar(&cold_dagger_5, &stats);
+        let cold_dagger_ar = calculate_ar(&cold_dagger_5, &stats).unwrap();
         assert_eq!(cold_dagger_ar, 173.0);
     }
 
@@ -269,7 +302,7 @@ mod tests {
         };
 
         let fire_flamberge_5 = Weapon::build_from_data("Fire Flamberge", 0).unwrap();
-        let fire_flamberge_ar = calculate_ar(&fire_flamberge_5, &stats);
+        let fire_flamberge_ar = calculate_ar(&fire_flamberge_5, &stats).unwrap();
         assert_eq!(fire_flamberge_ar, 224.0);
     }
 
@@ -287,43 +320,8 @@ mod tests {
             arcane: 10,
         };
 
-        let ruins_gs_0 = Weapon::build_from_data("Ruins Greatsword", 0).unwrap();
-        let ruins_gs_ar = calculate_ar(&ruins_gs_0, &stats);
+        let ruins_gs_0 = dbg!(Weapon::build_from_data("Ruins Greatsword", 0).unwrap());
+        let ruins_gs_ar = calculate_ar(&ruins_gs_0, &stats).unwrap();
         assert_eq!(ruins_gs_ar, 247.0);
-    }
-
-    #[test]
-    fn invalid_name() {
-        let ruins_gs_0 = Weapon::build_from_data("fiaonwe", 0);
-        assert!(ruins_gs_0.is_err());
-    }
-
-    #[test]
-    fn invalid_upgrade_level() {
-        let ruins_gs_0 = Weapon::build_from_data("Ruins Greatsword", 12);
-        assert!(ruins_gs_0.is_err());
-    }
-
-    #[test]
-    fn weapon_modification_ruins_gs_5_to_10() {
-        let stats = StatList {
-            level: 10,
-            vigor: 10,
-            mind: 10,
-            endurance: 10,
-            strength: 50,
-            dexterity: 14,
-            intelligence: 40,
-            faith: 10,
-            arcane: 10,
-        };
-
-        let mut ruins_gs_5 = dbg!(Weapon::build_from_data("Ruins Greatsword", 5).unwrap());
-        let ruins_gs_5_ar = calculate_ar(&ruins_gs_5, &stats);
-        assert_eq!(ruins_gs_5_ar, 487.0);
-
-        ruins_gs_5.upgrade_weapon(10);
-        let ruins_gs_10_ar = calculate_ar(&ruins_gs_5, &stats);
-        assert_eq!(ruins_gs_10_ar, 777.0);
     }
 }
