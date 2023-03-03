@@ -2,7 +2,7 @@
 use super::*;
 
 /// query the csv to get the attack element parameters given id
-pub fn get_attack_element_param(
+fn get_attack_element_param(
     attack_element_correct_id: i32,
 ) -> Result<Vec<i32>, Box<dyn Error>> {
     let path = Path::new("csv_data/AttackElementCorrectParam.csv");
@@ -34,7 +34,7 @@ pub fn get_attack_element_param(
     Ok(out)
 }
 
-/// query reinforce param csv for param
+/// query the csv for modifiers depending on the upgrade
 pub fn get_reinforce_param_modifier(reinforce_param_id: i32) -> Result<Vec<f32>, Box<dyn Error>> {
     let path = Path::new("csv_data/ReinforceParamWeapon.csv");
     let mut rdr = csv::Reader::from_path(path)?;
@@ -66,7 +66,7 @@ pub fn get_reinforce_param_modifier(reinforce_param_id: i32) -> Result<Vec<f32>,
 }
 
 /// query the csv to get the calc correct graph
-fn get_calc_correct_graph_ids(weapon_name: &str) -> Result<Vec<i32>, Box<dyn Error>> {
+pub fn get_calc_correct_graph_ids(weapon_name: &str) -> Result<Vec<i32>, Box<dyn Error>> {
     let path = Path::new("csv_data/CalcCorrectGraphID.csv");
     let mut rdr = csv::Reader::from_path(path)?;
 
@@ -97,7 +97,7 @@ fn get_calc_correct_graph_ids(weapon_name: &str) -> Result<Vec<i32>, Box<dyn Err
 }
 
 /// query the calc correct info given the id
-fn get_calc_correct_graphs(
+pub fn get_calc_correct_graphs(
     calc_correct_ids: &Vec<i32>,
 ) -> Result<HashMap<i32, Vec<f32>>, Box<dyn Error>> {
     let path = Path::new("csv_data/CalcCorrectGraph.csv");
@@ -181,7 +181,7 @@ fn dmg_type_per_stat(base_attack: f32, weapon_scaling: f32, calc_correct_result:
 
 // TODO this should maybe return an error in certain cases
 /// return the weapon ar given the weapon and corresponding character statlist
-pub fn calculate_ar(weapon: &weapon::Weapon, statlist: &StatList) -> Result<f32, Box<dyn Error>> {
+pub fn calculate_ar(weapon: &weapon::Weapon, statlist: &stats::StatList) -> Result<f32, Box<dyn Error>> {
     let mut total_ar: f32 = 0.0;
     let attack_element_param = get_attack_element_param(weapon.attack_element_correct_id)?;
     let calc_correct_ids = get_calc_correct_graph_ids(&weapon.name)?;
@@ -233,6 +233,7 @@ pub fn calculate_ar(weapon: &weapon::Weapon, statlist: &StatList) -> Result<f32,
 mod tests {
     use super::*;
     use crate::weapon::Weapon;
+    use crate::stats::StatList;
 
     #[test]
     fn valid_get_attack_element_param() {
@@ -282,7 +283,7 @@ mod tests {
             arcane: 10,
         };
 
-        let cold_dagger_5 = Weapon::build_from_data("Cold Dagger", 5).unwrap();
+        let cold_dagger_5 = Weapon::from_data("Cold Dagger", 5).unwrap();
         let cold_dagger_ar = calculate_ar(&cold_dagger_5, &stats).unwrap();
         assert_eq!(cold_dagger_ar, 173.0);
     }
@@ -301,7 +302,7 @@ mod tests {
             arcane: 10,
         };
 
-        let fire_flamberge_5 = Weapon::build_from_data("Fire Flamberge", 0).unwrap();
+        let fire_flamberge_5 = Weapon::from_data("Fire Flamberge", 0).unwrap();
         let fire_flamberge_ar = calculate_ar(&fire_flamberge_5, &stats).unwrap();
         assert_eq!(fire_flamberge_ar, 224.0);
     }
@@ -320,7 +321,7 @@ mod tests {
             arcane: 10,
         };
 
-        let ruins_gs_0 = dbg!(Weapon::build_from_data("Ruins Greatsword", 0).unwrap());
+        let ruins_gs_0 = dbg!(Weapon::from_data("Ruins Greatsword", 0).unwrap());
         let ruins_gs_ar = calculate_ar(&ruins_gs_0, &stats).unwrap();
         assert_eq!(ruins_gs_ar, 247.0);
     }

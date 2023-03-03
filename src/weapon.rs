@@ -85,7 +85,7 @@ impl Weapon {
     }
 
     /// build a weapon from the raw weapon data, given a name
-    pub fn build_from_data(weapon_name: &str, upgrade_lvl: i32) -> Result<Weapon, Box<dyn Error>> {
+    pub fn from_data(weapon_name: &str, upgrade_lvl: i32) -> Result<Weapon, Box<dyn Error>> {
         let path = Path::new("csv_data/RawData.csv");
         let mut rdr = csv::Reader::from_path(path)?;
         let mut stat_vals: Vec<f32> = Vec::new();
@@ -172,19 +172,19 @@ mod tests {
 
     #[test]
     fn invalid_name() {
-        let ruins_gs_0 = Weapon::build_from_data("fiaonwe", 0);
+        let ruins_gs_0 = Weapon::from_data("fiaonwe", 0);
         assert!(ruins_gs_0.is_err());
     }
 
     #[test]
     fn invalid_upgrade_level() {
-        let ruins_gs_0 = Weapon::build_from_data("Ruins Greatsword", 12);
+        let ruins_gs_0 = Weapon::from_data("Ruins Greatsword", 12);
         assert!(ruins_gs_0.is_err());
     }
 
     #[test]
     fn invalid_weapon_upgrade_modification() {
-        let stats = StatList {
+        let stats = stats::StatList {
             level: 10,
             vigor: 10,
             mind: 10,
@@ -196,7 +196,7 @@ mod tests {
             arcane: 10,
         };
 
-        let mut ruins_gs_5 = Weapon::build_from_data("Ruins Greatsword", 5).unwrap();
+        let mut ruins_gs_5 = Weapon::from_data("Ruins Greatsword", 5).unwrap();
         let ruins_gs_5_ar = ar_calculator::calculate_ar(&ruins_gs_5, &stats).unwrap();
         assert_eq!(ruins_gs_5_ar, 487.0);
 
@@ -207,7 +207,7 @@ mod tests {
 
     #[test]
     fn valid_weapon_upgrade_modification() {
-        let stats = StatList {
+        let stats = stats::StatList {
             level: 10,
             vigor: 10,
             mind: 10,
@@ -219,7 +219,7 @@ mod tests {
             arcane: 10,
         };
 
-        let mut ruins_gs_5 = Weapon::build_from_data("Ruins Greatsword", 5).unwrap();
+        let mut ruins_gs_5 = Weapon::from_data("Ruins Greatsword", 5).unwrap();
         let ruins_gs_5_ar = ar_calculator::calculate_ar(&ruins_gs_5, &stats).unwrap();
         assert_eq!(ruins_gs_5_ar, 487.0);
 
