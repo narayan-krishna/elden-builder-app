@@ -81,7 +81,7 @@ mod starting_classes {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct StatList {
     pub level: i32,
     pub vigor: i32,
@@ -96,8 +96,14 @@ pub struct StatList {
 }
 
 impl StatList {
-    pub fn from_slice(stats_list: [i32; 8], level: i32, class: StartingClassType) -> StatList {
-        StatList {
+    pub fn from_slice(
+        stats_list: [i32; 8],
+        level: i32,
+        class: StartingClassType,
+    ) -> Result<StatList, &'static str> {
+        // this needs to verify
+
+        Ok(StatList {
             level,
             vigor: stats_list[0],
             mind: stats_list[1],
@@ -108,7 +114,7 @@ impl StatList {
             faith: stats_list[6],
             arcane: stats_list[7],
             class,
-        }
+        })
     }
 
     pub fn from_starting_class(starting_class: StartingClassType) -> StatList {
@@ -118,6 +124,7 @@ impl StatList {
             starting_class_vals.level,
             starting_class,
         )
+        .unwrap()
     }
 
     // pub fn get_starting_class_stats(starting_class: StartingClassType) -> StatList {
@@ -163,21 +170,19 @@ mod tests {
             [60, 15, 40, 80, 14, 15, 6, 9],
             160,
             StartingClassType::Prisoner,
-        ));
+        )
+        .unwrap());
 
-        assert_eq!(
-            stats.unspent_levels().unwrap(),
-            0
-        );
+        assert_eq!(stats.unspent_levels().unwrap(), 0);
     }
 
     #[test]
     fn invalid_unspent_levels() {
-        let mut stats = dbg!(StatList::from_slice(
-            [50, 15, 30, 50, 14, 15, 6, 9],
-            40,
-            StartingClassType::Hero,
-        ));
+        let mut stats =
+            dbg!(
+                StatList::from_slice([50, 15, 30, 50, 14, 15, 6, 9], 40, StartingClassType::Hero,)
+                    .unwrap()
+            );
 
         assert_eq!(
             stats.unspent_levels().err(),

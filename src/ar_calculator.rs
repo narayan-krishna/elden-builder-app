@@ -2,7 +2,9 @@
 use super::*;
 
 /// query the csv to get the attack element parameters given id
-fn get_attack_element_param(attack_element_correct_id: i32) -> Result<Vec<i32>, Box<dyn Error>> {
+pub fn get_attack_element_param(
+    attack_element_correct_id: i32,
+) -> Result<Vec<i32>, Box<dyn Error>> {
     let path = Path::new("csv_data/AttackElementCorrectParam.csv");
     let mut rdr = csv::Reader::from_path(path)?;
 
@@ -191,6 +193,7 @@ pub fn calculate_ar(
         &attack_element_param,
         &calc_correct_ids,
         &calc_correct_graphs,
+        true,
     )
 }
 
@@ -202,7 +205,10 @@ pub fn calculate_ar_core(
     attack_element_param: &Vec<i32>,
     calc_correct_ids: &Vec<i32>,
     calc_correct_graphs: &HashMap<i32, Vec<f32>>,
+    floor: bool,
 ) -> Result<f32, Box<dyn Error>> {
+    // TODO: check that stats meet weapon reqs
+
     let mut total_ar: f32 = 0.0;
 
     for i in 0..5 {
@@ -216,7 +222,7 @@ pub fn calculate_ar_core(
         };
 
         if current_attack_stat > 0.0 {
-            println!("\ncurrent stat: {}", current_attack_stat);
+            // println!("\ncurrent stat: {}", current_attack_stat);
             total_ar += current_attack_stat;
 
             let calc_correct_graph: &Vec<f32> = calc_correct_graphs
@@ -234,17 +240,20 @@ pub fn calculate_ar_core(
                 };
 
                 if attack_element_param[(5 * i) + j] == 1 {
-                    let calc_correct_value = dbg!(calc_correct(stat, &calc_correct_graph));
+                    let calc_correct_value = calc_correct(stat, &calc_correct_graph);
                     let dmg =
                         dmg_type_per_stat(current_attack_stat, weapon_scaling, calc_correct_value);
-                    println!("scaling {}: {}", (5 * i) + j, dmg);
+                    // println!("scaling {}: {}", (5 * i) + j, dmg);
                     total_ar += dmg;
                 }
             }
         }
     }
 
-    Ok(total_ar.floor())
+    match floor {
+        true => Ok(total_ar.floor()),
+        false => Ok(total_ar),
+    }
 }
 
 #[cfg(test)]
@@ -356,5 +365,34 @@ mod tests {
         let ruins_gs_0 = dbg!(Weapon::from_data("Ruins Greatsword", 0).unwrap());
         let ruins_gs_ar = calculate_ar(&ruins_gs_0, &stats).unwrap();
         assert_eq!(ruins_gs_ar, 247.0);
+    }
+
+    #[test]
+    fn ruins_gs_5_wretch_stats() { //TODO: need to fix in the case that stats don't meet weapon
+                                   //reqs
+                                   // let stats = stats::StatList::from_slice(
+                                   //     [10, 10, 10, 10, 10, 10, 10, 10],
+                                   //     2,
+                                   //     StartingClassType::Wretch,
+                                   // )
+                                   // .expect("failed to create stats");
+                                   //
+                                   // let stats = StatList {
+                                   //     level: 10,
+                                   //     vigor: 10,
+                                   //     mind: 10,
+                                   //     endurance: 10,
+                                   //     strength: 10,
+                                   //     dexterity: 14,
+                                   //     intelligence: 10,
+                                   //     faith: 10,
+                                   //     arcane: 10,
+                                   //     class: StartingClassType::Wretch,
+                                   // };
+                                   // let ruins_gs_5 =
+                                   //     weapon::Weapon::from_data("Ruins Greatsword", 5).expect("failed to create weapon");
+                                   // let ar = calculate_ar(&ruins_gs_5, &stats).expect("unable to calculate ar");
+                                   //
+                                   // assert_eq!(ar, 166.0);
     }
 }

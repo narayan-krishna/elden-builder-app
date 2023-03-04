@@ -10,6 +10,7 @@ mod optimizer;
 mod stats;
 mod weapon;
 
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Scaling {
     Str,
     Dex,
@@ -27,7 +28,7 @@ pub enum Attack {
     Stamina,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum StartingClassType {
     Hero,
     Bandit,
