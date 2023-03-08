@@ -3,12 +3,13 @@
 use csv;
 use std::collections::HashMap;
 use std::error::Error;
+use std::ops::{Index, IndexMut};
 use std::path::Path;
 
 mod ar_calculator;
-mod optimizer;
+mod optimizers;
 mod stats;
-mod weapon;
+mod weapons;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Scaling {

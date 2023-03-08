@@ -127,11 +127,6 @@ impl StatList {
         .unwrap()
     }
 
-    // pub fn get_starting_class_stats(starting_class: StartingClassType) -> StatList {
-    //     let starting_class_vals = starting_classes::get_starter_class_info(starting_class);
-    //
-    // }
-
     pub fn unspent_levels(&mut self) -> Result<i32, &'static str> {
         let starting_class_vals = starting_classes::from_type(self.class);
 
@@ -157,6 +152,50 @@ impl StatList {
         }
 
         Ok(spent_levels - levels_allocated)
+    }
+
+    // check if the stats meet the requirements of the weapon
+    pub fn check_weapon_requirements(&self, weapon: &weapons::Weapon) -> bool {
+        for stat in [
+            Scaling::Str,
+            Scaling::Dex,
+            Scaling::Int,
+            Scaling::Fai,
+            Scaling::Arc,
+        ] {
+            let stat_val = self[stat];
+            if stat_val < weapon.get_required_scaling_stat(stat) {
+                return false;
+            }
+        }
+
+        true
+    }
+}
+
+impl Index<Scaling> for StatList {
+    type Output = i32;
+
+    fn index(&self, index: Scaling) -> &Self::Output {
+        match index {
+            Scaling::Str => &self.strength,
+            Scaling::Dex => &self.dexterity,
+            Scaling::Int => &self.intelligence,
+            Scaling::Fai => &self.faith,
+            Scaling::Arc => &self.arcane,
+        }
+    }
+}
+
+impl IndexMut<Scaling> for StatList {
+    fn index_mut(&mut self, index: Scaling) -> &mut Self::Output {
+        match index {
+            Scaling::Str => &mut self.strength,
+            Scaling::Dex => &mut self.dexterity,
+            Scaling::Int => &mut self.intelligence,
+            Scaling::Fai => &mut self.faith,
+            Scaling::Arc => &mut self.arcane,
+        }
     }
 }
 
@@ -188,5 +227,30 @@ mod tests {
             stats.unspent_levels().err(),
             Some("Level value is incorrect")
         );
+    }
+
+    #[test]
+    fn meets_weapon_requirements_false() {
+        let stats = StatList::from_starting_class(StartingClassType::Wretch);
+        let weapon = weapons::Weapon::from_data("Moonveil", 3).expect("failed to get weapon");
+        assert!(!stats.check_weapon_requirements(&weapon));
+    }
+
+    #[test]
+    fn meets_weapon_requirements_true() {
+        let stats =
+            StatList::from_slice([50, 15, 30, 50, 50, 50, 6, 9], 40, StartingClassType::Hero)
+                .unwrap();
+        let weapon = weapons::Weapon::from_data("Moonveil", 3).expect("failed to get weapon");
+        assert!(stats.check_weapon_requirements(&weapon));
+    }
+
+    #[test]
+    fn test_stat_list_index() {
+        let stats =
+            StatList::from_slice([50, 15, 30, 50, 50, 50, 6, 9], 40, StartingClassType::Hero)
+                .unwrap();
+        assert_eq!(stats[Scaling::Str], 50);
+        assert_ne!(stats[Scaling::Fai], 50);
     }
 }

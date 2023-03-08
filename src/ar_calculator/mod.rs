@@ -1,191 +1,15 @@
-// TODO: most query functions here need error handling in case of fail
+pub mod csv_parsing;
+
 use super::*;
 
-/// query the csv to get the attack element parameters given id
-pub fn get_attack_element_param(
-    attack_element_correct_id: i32,
-) -> Result<Vec<i32>, Box<dyn Error>> {
-    let path = Path::new("csv_data/AttackElementCorrectParam.csv");
-    let mut rdr = csv::Reader::from_path(path)?;
-
-    let mut out: Vec<i32> = Vec::new();
-
-    for result in rdr.records() {
-        let record = result?;
-        if record.get(0).unwrap() == attack_element_correct_id.to_string() {
-            // println!("{:?}", record);
-            out = (1..record.len())
-                .map(|i| {
-                    record
-                        .get(i)
-                        .unwrap()
-                        .parse()
-                        .expect("failed to translate entry to number")
-                })
-                .collect();
-            break;
-        }
-    }
-
-    if rdr.is_done() {
-        return Err("failed to get attack element param".into());
-    }
-
-    Ok(out)
-}
-
-/// query the csv for modifiers depending on the upgrade
-pub fn get_reinforce_param_modifier(reinforce_param_id: i32) -> Result<Vec<f32>, Box<dyn Error>> {
-    let path = Path::new("csv_data/ReinforceParamWeapon.csv");
-    let mut rdr = csv::Reader::from_path(path)?;
-
-    let mut out: Vec<f32> = Vec::new();
-
-    for result in rdr.records() {
-        let record = result?;
-        if record.get(0).unwrap() == reinforce_param_id.to_string() {
-            // println!("{:?}", record);
-            out = (1..12)
-                .map(|i| {
-                    record
-                        .get(i)
-                        .unwrap()
-                        .parse()
-                        .expect("failed to translate entry to number")
-                })
-                .collect();
-            break;
-        }
-    }
-
-    if rdr.is_done() {
-        return Err("failed to find weapon".into());
-    }
-
-    Ok(out)
-}
-
-/// query the csv to get the calc correct graph
-pub fn get_calc_correct_graph_ids(weapon_name: &str) -> Result<Vec<i32>, Box<dyn Error>> {
-    let path = Path::new("csv_data/CalcCorrectGraphID.csv");
-    let mut rdr = csv::Reader::from_path(path)?;
-
-    let mut out: Vec<i32> = Vec::new();
-
-    for result in rdr.records() {
-        let record = result?;
-        if record.get(1).unwrap() == weapon_name {
-            // println!("{:?}", record);
-            out = (2..record.len())
-                .map(|i| {
-                    record
-                        .get(i)
-                        .unwrap()
-                        .parse()
-                        .expect("failed to translate entry to number")
-                })
-                .collect();
-            break;
-        }
-    }
-
-    if rdr.is_done() {
-        return Err("failed to get calc correct graph ids".into());
-    }
-
-    Ok(out)
-}
-
-/// query the calc correct info given the id
-pub fn get_calc_correct_graphs(
-    calc_correct_ids: &Vec<i32>,
-) -> Result<HashMap<i32, Vec<f32>>, Box<dyn Error>> {
-    let path = Path::new("csv_data/CalcCorrectGraph.csv");
-    let mut rdr = csv::Reader::from_path(path)?;
-
-    let mut calc_correct_graphs: HashMap<i32, Vec<f32>> = HashMap::new();
-
-    for id in calc_correct_ids {
-        if calc_correct_graphs.get(&id).is_none() {
-            for result in rdr.records() {
-                let record = result?;
-                if record.get(0).unwrap() == id.to_string() {
-                    // println!("{:?}", record);
-                    let graph: Vec<f32> = (2..record.len())
-                        .map(|i| {
-                            record
-                                .get(i)
-                                .unwrap()
-                                .parse()
-                                .expect("failed to translate entry to number")
-                        })
-                        .collect();
-
-                    calc_correct_graphs.insert(*id, graph);
-
-                    break;
-                }
-            }
-
-            if rdr.is_done() {
-                return Err("failed to get calc correct graph".into());
-            }
-        }
-    }
-
-    Ok(calc_correct_graphs)
-}
-
-// change this to take graph as a 2d array where rows are stat, growth, exp and cols are values
-fn calc_correct(input: i32, graph: &Vec<f32>) -> f32 {
-    if input == 0 {
-        return 0.0;
-    }
-
-    // calculate stat min, stat max, exp min, exp max, growth min, growth max
-    let mut get_max_index: Option<usize> = None;
-    for i in 0..5 {
-        if input < graph[i] as i32 {
-            get_max_index = Some(i);
-            break;
-        }
-    }
-
-    let max_index = get_max_index.expect("max_index never assigned");
-    let min_index = max_index - 1;
-
-    let stat_min = graph[min_index];
-    let stat_max = graph[max_index];
-    let grow_min = graph[min_index + 5];
-    let grow_max = graph[max_index + 5];
-    let exp_min = graph[min_index + 10];
-    let _exp_max = graph[max_index + 10];
-
-    let ratio: f32 = (input as f32 - stat_min) / (stat_max - stat_min);
-    let growth: f32;
-
-    match exp_min > 0.0 {
-        true => growth = f32::powf(ratio, exp_min),
-        false => growth = 1.0 - f32::powf(1.0 - ratio, exp_min.abs()),
-    }
-
-    let output = grow_min + ((grow_max - grow_min) * growth);
-
-    output
-}
-
-/// calculate the type damage added to the AR based on the stat
-fn dmg_type_per_stat(base_attack: f32, weapon_scaling: f32, calc_correct_result: f32) -> f32 {
-    base_attack * (weapon_scaling / 100.0) * (calc_correct_result / 100.0)
-}
-
 pub fn calculate_ar(
-    weapon: &weapon::Weapon,
+    weapon: &weapons::Weapon,
     statlist: &stats::StatList,
 ) -> Result<f32, Box<dyn Error>> {
-    let attack_element_param = get_attack_element_param(weapon.attack_element_correct_id)?;
-    let calc_correct_ids = get_calc_correct_graph_ids(&weapon.name)?;
-    let calc_correct_graphs = get_calc_correct_graphs(&calc_correct_ids)?;
+    let attack_element_param =
+        csv_parsing::get_attack_element_param(weapon.attack_element_correct_id)?;
+    let calc_correct_ids = csv_parsing::get_calc_correct_graph_ids(&weapon.name)?;
+    let calc_correct_graphs = csv_parsing::get_calc_correct_graphs(&calc_correct_ids)?;
 
     calculate_ar_core(
         weapon,
@@ -197,10 +21,11 @@ pub fn calculate_ar(
     )
 }
 
-// TODO this should maybe return an error in certain cases. better name?
-/// return the weapon ar given the weapon and corresponding character statlist
+/// core ar calculator given all necessary values (attack element parameter, calc correct ids, calc
+/// correct graphs). used in operations where the ar needs to be calculated multiple times for the
+/// same weapon.
 pub fn calculate_ar_core(
-    weapon: &weapon::Weapon,
+    weapon: &weapons::Weapon,
     statlist: &stats::StatList,
     attack_element_param: &Vec<i32>,
     calc_correct_ids: &Vec<i32>,
@@ -240,16 +65,19 @@ pub fn calculate_ar_core(
                 };
 
                 if attack_element_param[(5 * i) + j] == 1 {
-                    let calc_correct_value = calc_correct(stat, &calc_correct_graph);
+                    let calc_correct_value = csv_parsing::calc_correct(stat, &calc_correct_graph);
                     let dmg =
                         dmg_type_per_stat(current_attack_stat, weapon_scaling, calc_correct_value);
-                    // println!("scaling {}: {}", (5 * i) + j, dmg);
                     total_ar += dmg;
                 }
             }
         }
     }
 
+    /// calculate the type damage added to the AR based on the stat
+    fn dmg_type_per_stat(base_attack: f32, weapon_scaling: f32, calc_correct_result: f32) -> f32 {
+        base_attack * (weapon_scaling / 100.0) * (calc_correct_result / 100.0)
+    }
     match floor {
         true => Ok(total_ar.floor()),
         false => Ok(total_ar),
@@ -260,11 +88,11 @@ pub fn calculate_ar_core(
 mod tests {
     use super::*;
     use crate::stats::StatList;
-    use crate::weapon::Weapon;
+    use crate::weapons::Weapon;
 
     #[test]
     fn valid_get_attack_element_param() {
-        let attack_element_param = get_attack_element_param(10013).unwrap();
+        let attack_element_param = csv_parsing::get_attack_element_param(10013).unwrap();
         assert_eq!(
             attack_element_param,
             vec![1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0]
@@ -273,7 +101,7 @@ mod tests {
 
     #[test]
     fn valid_get_reinforce_param_modifier() {
-        let reinforce_param_modifier = get_reinforce_param_modifier(402).unwrap();
+        let reinforce_param_modifier = csv_parsing::get_reinforce_param_modifier(402).unwrap();
         assert_eq!(
             reinforce_param_modifier,
             vec![0.872, 0.872, 0.872, 0.872, 0.872, 1.08, 1.38, 0.56, 1.08, 1.08, 1.08]
@@ -283,14 +111,15 @@ mod tests {
     #[test]
     fn valid_get_calc_correct_graph_ids() {
         let calc_correct_graph_ids =
-            get_calc_correct_graph_ids("Miquellan Knight's Sword").unwrap();
+            csv_parsing::get_calc_correct_graph_ids("Miquellan Knight's Sword").unwrap();
         assert_eq!(calc_correct_graph_ids, vec![0, 4, 0, 0, 4]);
     }
 
     #[test]
     fn valid_get_calc_correct_graphs() {
         let calc_correct_graph_ids = vec![0, 4, 0, 0, 4];
-        let calc_correct_graph = get_calc_correct_graphs(&calc_correct_graph_ids).unwrap();
+        let calc_correct_graph =
+            csv_parsing::get_calc_correct_graphs(&calc_correct_graph_ids).unwrap();
 
         assert_eq!(
             calc_correct_graph.get(&0).unwrap(),

@@ -1,3 +1,5 @@
+use weapons::ar_calculator::csv_parsing;
+
 use super::*;
 
 #[derive(Debug)]
@@ -94,7 +96,7 @@ impl Weapon {
 
         self.upgrade_lvl = upgrade_lvl;
 
-        match ar_calculator::get_reinforce_param_modifier(self.reinforce_param_id + upgrade_lvl) {
+        match csv_parsing::get_reinforce_param_modifier(self.reinforce_param_id + upgrade_lvl) {
             Ok(modifiers) => {
                 self.modifiers = modifiers;
                 Ok(())
@@ -168,7 +170,7 @@ impl Weapon {
         }
 
         let modifiers =
-            ar_calculator::get_reinforce_param_modifier(reinforce_param_id + upgrade_lvl)?;
+            csv_parsing::get_reinforce_param_modifier(reinforce_param_id + upgrade_lvl)?;
 
         Ok(Weapon {
             name: weapon_name.to_string(),
