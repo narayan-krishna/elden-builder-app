@@ -65,7 +65,7 @@ pub fn calculate_ar_core(
                 };
 
                 if attack_element_param[(5 * i) + j] == 1 {
-                    let calc_correct_value = csv_parsing::calc_correct(stat, &calc_correct_graph);
+                    let calc_correct_value = ar_calculator::calc_correct(stat, &calc_correct_graph);
                     let dmg =
                         dmg_type_per_stat(current_attack_stat, weapon_scaling, calc_correct_value);
                     total_ar += dmg;
@@ -74,14 +74,55 @@ pub fn calculate_ar_core(
         }
     }
 
-    /// calculate the type damage added to the AR based on the stat
-    fn dmg_type_per_stat(base_attack: f32, weapon_scaling: f32, calc_correct_result: f32) -> f32 {
-        base_attack * (weapon_scaling / 100.0) * (calc_correct_result / 100.0)
-    }
     match floor {
         true => Ok(total_ar.floor()),
         false => Ok(total_ar),
     }
+}
+
+/// calculate the type damage added to the AR based on the stat
+fn dmg_type_per_stat(base_attack: f32, weapon_scaling: f32, calc_correct_result: f32) -> f32 {
+    base_attack * (weapon_scaling / 100.0) * (calc_correct_result / 100.0)
+}
+
+
+// TODO: change this to take graph as a 2d array where rows are stat, growth, exp and cols are values
+/// calculate the calc correct value for a certain  stat input
+pub fn calc_correct(input: i32, graph: &Vec<f32>) -> f32 {
+    if input == 0 {
+        return 0.0;
+    }
+
+    // calculate stat min, stat max, exp min, exp max, growth min, growth max
+    let mut get_max_index: Option<usize> = None;
+    for i in 0..5 {
+        if input < graph[i] as i32 {
+            get_max_index = Some(i);
+            break;
+        }
+    }
+
+    let max_index = get_max_index.expect("max_index never assigned");
+    let min_index = max_index - 1;
+
+    let stat_min = graph[min_index];
+    let stat_max = graph[max_index];
+    let grow_min = graph[min_index + 5];
+    let grow_max = graph[max_index + 5];
+    let exp_min = graph[min_index + 10];
+    let _exp_max = graph[max_index + 10];
+
+    let ratio: f32 = (input as f32 - stat_min) / (stat_max - stat_min);
+    let growth: f32;
+
+    match exp_min > 0.0 {
+        true => growth = f32::powf(ratio, exp_min),
+        false => growth = 1.0 - f32::powf(1.0 - ratio, exp_min.abs()),
+    }
+
+    let output = grow_min + ((grow_max - grow_min) * growth);
+
+    output
 }
 
 #[cfg(test)]
