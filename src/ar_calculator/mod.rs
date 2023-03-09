@@ -56,11 +56,14 @@ pub fn calculate_ar_core(
 
             for j in 0..5 {
                 let (weapon_scaling, stat) = match j {
-                    0 => (weapon.get_scaling_stat(Scaling::Str), statlist.strength),
-                    1 => (weapon.get_scaling_stat(Scaling::Dex), statlist.dexterity),
-                    2 => (weapon.get_scaling_stat(Scaling::Int), statlist.intelligence),
-                    3 => (weapon.get_scaling_stat(Scaling::Fai), statlist.faith),
-                    4 => (weapon.get_scaling_stat(Scaling::Arc), statlist.arcane),
+                    0 => (weapon.get_scaling_stat(CoreStat::Str), statlist.strength),
+                    1 => (weapon.get_scaling_stat(CoreStat::Dex), statlist.dexterity),
+                    2 => (
+                        weapon.get_scaling_stat(CoreStat::Int),
+                        statlist.intelligence,
+                    ),
+                    3 => (weapon.get_scaling_stat(CoreStat::Fai), statlist.faith),
+                    4 => (weapon.get_scaling_stat(CoreStat::Arc), statlist.arcane),
                     _ => (0.0, 0),
                 };
 
@@ -84,7 +87,6 @@ pub fn calculate_ar_core(
 fn dmg_type_per_stat(base_attack: f32, weapon_scaling: f32, calc_correct_result: f32) -> f32 {
     base_attack * (weapon_scaling / 100.0) * (calc_correct_result / 100.0)
 }
-
 
 // TODO: change this to take graph as a 2d array where rows are stat, growth, exp and cols are values
 /// calculate the calc correct value for a certain  stat input

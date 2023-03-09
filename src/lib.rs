@@ -12,12 +12,44 @@ mod stats;
 mod weapons;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub enum Scaling {
+pub enum CoreStat {
+    Vig,
+    Mnd,
+    End,
     Str,
     Dex,
     Int,
     Fai,
     Arc,
+}
+
+impl CoreStat {
+    fn iter_all() -> impl Iterator<Item = CoreStat> {
+        [
+            CoreStat::Vig,
+            CoreStat::Mnd,
+            CoreStat::End,
+            CoreStat::Str,
+            CoreStat::Dex,
+            CoreStat::Int,
+            CoreStat::Fai,
+            CoreStat::Arc,
+        ]
+        .iter()
+        .copied()
+    }
+
+    fn iter_scalings() -> impl Iterator<Item = CoreStat> {
+        [
+            CoreStat::Str,
+            CoreStat::Dex,
+            CoreStat::Int,
+            CoreStat::Fai,
+            CoreStat::Arc,
+        ]
+        .iter()
+        .copied()
+    }
 }
 
 pub enum Attack {

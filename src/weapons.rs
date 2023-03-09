@@ -40,18 +40,18 @@ impl Weapon {
         }
     }
 
-    pub fn get_non_zero_attack_stats(&self) -> Vec<Scaling> {
+    pub fn get_non_zero_attack_stats(&self) -> Vec<CoreStat> {
         self.scaling_vals
             .iter()
             .enumerate()
             .filter(|(_, i)| **i != 0.0)
             .map(|(a, _)| match a {
-                0 => Scaling::Str,
-                1 => Scaling::Dex,
-                2 => Scaling::Int,
-                3 => Scaling::Fai,
-                4 => Scaling::Arc,
-                _ => Scaling::Str,
+                0 => CoreStat::Str,
+                1 => CoreStat::Dex,
+                2 => CoreStat::Int,
+                3 => CoreStat::Fai,
+                4 => CoreStat::Arc,
+                _ => CoreStat::Str,
             })
             .collect()
     }
@@ -67,23 +67,27 @@ impl Weapon {
         }
     }
 
-    pub fn get_scaling_stat(&self, scaling: Scaling) -> f32 {
+    // return an option if a non scaling stat is supplied
+    pub fn get_scaling_stat(&self, scaling: CoreStat) -> f32 {
         match scaling {
-            Scaling::Str => self.scaling_vals[0] * self.modifiers[6],
-            Scaling::Dex => self.scaling_vals[1] * self.modifiers[7],
-            Scaling::Int => self.scaling_vals[2] * self.modifiers[8],
-            Scaling::Fai => self.scaling_vals[3] * self.modifiers[9],
-            Scaling::Arc => self.scaling_vals[4] * self.modifiers[10],
+            CoreStat::Str => self.scaling_vals[0] * self.modifiers[6],
+            CoreStat::Dex => self.scaling_vals[1] * self.modifiers[7],
+            CoreStat::Int => self.scaling_vals[2] * self.modifiers[8],
+            CoreStat::Fai => self.scaling_vals[3] * self.modifiers[9],
+            CoreStat::Arc => self.scaling_vals[4] * self.modifiers[10],
+            _ => 0.0,
         }
     }
 
-    pub fn get_required_scaling_stat(&self, scaling_stat: Scaling) -> i32 {
+    // return an option if a non scaling stat is supplied
+    pub fn get_required_scaling_stat(&self, scaling_stat: CoreStat) -> i32 {
         match scaling_stat {
-            Scaling::Str => self.required_stats[0],
-            Scaling::Dex => self.required_stats[1],
-            Scaling::Int => self.required_stats[2],
-            Scaling::Fai => self.required_stats[3],
-            Scaling::Arc => self.required_stats[4],
+            CoreStat::Str => self.required_stats[0],
+            CoreStat::Dex => self.required_stats[1],
+            CoreStat::Int => self.required_stats[2],
+            CoreStat::Fai => self.required_stats[3],
+            CoreStat::Arc => self.required_stats[4],
+            _ => 0,
         }
     }
 
@@ -214,7 +218,7 @@ mod tests {
     fn get_non_zero_attack_stats_check() {
         let ruins_gs_5 = dbg!(Weapon::from_data("Ruins Greatsword", 5).unwrap());
         let relevant_stats = ruins_gs_5.get_non_zero_attack_stats();
-        let ans = vec![Scaling::Str, Scaling::Int];
+        let ans = vec![CoreStat::Str, CoreStat::Int];
 
         assert_eq!(relevant_stats, ans);
     }
