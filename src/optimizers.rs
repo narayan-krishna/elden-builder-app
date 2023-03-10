@@ -110,4 +110,19 @@ mod tests {
 
         assert!(dbg!(optimize_statlist_for_weapon(&weapon, &stats).is_ok()));
     }
+
+    #[test]
+    fn vykes_war_spear_wretch_optimization() {
+        // ar -> 700
+        // vs. 660
+        let stats = stats::StatList::from_slice_with_class_check(
+            [15, 20, 30, 14, 13, 9, 9, 7],
+            108,
+            StartingClassType::Vagabond
+        ).expect("failed to create stats");
+
+        let weapon = weapons::Weapon::from_data("Vyke's War Spear", 10).expect("failed to creat weapon");
+
+        dbg!(optimize_statlist_for_weapon(&weapon, &stats).unwrap());
+    }
 }
