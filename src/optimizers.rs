@@ -51,6 +51,7 @@ pub fn optimize_statlist_for_weapon(
         eprintln!("Allocating a point into {:?}", allocation.unwrap());
         if let Some(stat) = allocation {
             optimized_statlist[stat] += 1;
+
         } else {
             return Err("Allocation was never assigned, failed to allocate statpoint".into());
         }
@@ -64,8 +65,9 @@ pub fn optimize_statlist_for_weapon(
 
 /// find the optimal character choice for a particular weapon, at a particular level.
 // if no level is assigned, this can default at 100/120/150
-pub fn opitimize_character_selection_for_weapon() {
+pub fn optimize_character_selection_for_weapon(weapon: weapons::Weapon, level: i32) {
     todo!()
+    // how do we do this?
 }
 
 #[cfg(test)]

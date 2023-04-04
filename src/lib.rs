@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::ops::{Index, IndexMut};
 use std::path::Path;
+use std::fmt::Display;
 
 mod ar_calculator;
 mod optimizers;
@@ -74,3 +75,5 @@ pub enum StartingClassType {
     Prophet,
     Samurai,
 }
+
+type Levels = i32;

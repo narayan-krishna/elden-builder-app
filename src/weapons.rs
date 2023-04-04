@@ -190,6 +190,12 @@ impl Weapon {
     }
 }
 
+impl Display for Weapon {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "\nweapon name: {}\nupgrade level: {}\n", self.name, self.upgrade_lvl)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -281,5 +287,11 @@ mod tests {
         ruins_gs_5.upgrade_weapon(10).unwrap();
         let ruins_gs_10_ar = ar_calculator::calculate_ar(&ruins_gs_5, &stats).unwrap();
         assert_eq!(ruins_gs_10_ar, 777.0);
+    }
+
+    #[test]
+    fn weapon_display() {
+        let ruins_gs_5 = Weapon::from_data("Ruins Greatsword", 5).unwrap();
+        println!("new weapon display, what do you think?: {}", ruins_gs_5)
     }
 }
