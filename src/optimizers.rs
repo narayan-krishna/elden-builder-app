@@ -51,7 +51,6 @@ pub fn optimize_statlist_for_weapon(
         eprintln!("Allocating a point into {:?}", allocation.unwrap());
         if let Some(stat) = allocation {
             optimized_statlist[stat] += 1;
-
         } else {
             return Err("Allocation was never assigned, failed to allocate statpoint".into());
         }
@@ -120,10 +119,12 @@ mod tests {
         let stats = stats::StatList::from_slice_with_class_check(
             [15, 20, 30, 14, 13, 9, 9, 7],
             108,
-            StartingClassType::Vagabond
-        ).expect("failed to create stats");
+            StartingClassType::Vagabond,
+        )
+        .expect("failed to create stats");
 
-        let weapon = weapons::Weapon::from_data("Vyke's War Spear", 10).expect("failed to creat weapon");
+        let weapon =
+            weapons::Weapon::from_data("Vyke's War Spear", 10).expect("failed to creat weapon");
 
         dbg!(optimize_statlist_for_weapon(&weapon, &stats).unwrap());
     }

@@ -1,4 +1,5 @@
 pub mod csv_parsing;
+use std::collections::HashMap;
 
 use super::*;
 
@@ -240,31 +241,7 @@ mod tests {
     }
 
     #[test]
-    fn ruins_gs_5_wretch_stats() { //TODO: need to fix in the case that stats don't meet weapon
-                                   //reqs
-                                   // let stats = stats::StatList::from_slice(
-                                   //     [10, 10, 10, 10, 10, 10, 10, 10],
-                                   //     2,
-                                   //     StartingClassType::Wretch,
-                                   // )
-                                   // .expect("failed to create stats");
-                                   //
-                                   // let stats = StatList {
-                                   //     level: 10,
-                                   //     vigor: 10,
-                                   //     mind: 10,
-                                   //     endurance: 10,
-                                   //     strength: 10,
-                                   //     dexterity: 14,
-                                   //     intelligence: 10,
-                                   //     faith: 10,
-                                   //     arcane: 10,
-                                   //     class: StartingClassType::Wretch,
-                                   // };
-                                   // let ruins_gs_5 =
-                                   //     weapon::Weapon::from_data("Ruins Greatsword", 5).expect("failed to create weapon");
-                                   // let ar = calculate_ar(&ruins_gs_5, &stats).expect("unable to calculate ar");
-                                   //
-                                   // assert_eq!(ar, 166.0);
+    fn ruins_gs_5_wretch_stats() { 
+        todo!()
     }
 }

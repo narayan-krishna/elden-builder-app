@@ -1,16 +1,69 @@
 #![allow(dead_code)]
 
-use csv;
-use std::collections::HashMap;
+use axum::response::Json;
+use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
 use std::error::Error;
-use std::ops::{Index, IndexMut};
-use std::path::Path;
 use std::fmt::Display;
+use std::ops::{Index, IndexMut};
 
 mod ar_calculator;
 mod optimizers;
 mod stats;
 mod weapons;
+
+pub async fn get_profile() -> Json<Value> {
+    Json(json!({"name": "krishna", "about": "loves to eat"}))
+}
+
+pub async fn get_statlist() -> Json<stats::StatList> {
+    eprintln!("called backend statlist acquisition");
+    let statlist = stats::StatList::from_slice_with_class_check(
+        [60, 15, 40, 11, 17, 18, 6, 9],
+        150,
+        StartingClassType::Prisoner,
+    )
+    .expect("failed to create stats");
+
+    Json(statlist)
+}
+
+//TODO: this needs to take a weapon in addition to stats. for now we'll create a weapon here
+pub async fn get_optimized_statlist(Json(payload): Json<stats::StatList>) -> Json<stats::StatList> {
+    eprintln!("called backend statlist optimization");
+    let ruins_gs_5 = weapons::Weapon::from_data("Ruins Greatsword", 5).unwrap();
+    let statlist = optimizers::optimize_statlist_for_weapon(&ruins_gs_5, &payload).unwrap();
+
+    Json(statlist)
+}
+
+pub async fn get_reset_statlist(Json(payload): Json<stats::StatList>) -> Json<stats::StatList> {
+    eprintln!("called backend statlist reset");
+    let statlist = stats::StatList::from_starting_class(payload.class);
+
+    Json(statlist)
+}
+
+// this needs to receive a new addition
+pub async fn change_starter_class(
+    Json(mut payload): Json<UserChangeStartingClass>,
+) -> Json<stats::StatList> {
+    // some logic for reducing or increasing stats as neccesary to a new starter class type
+    // increase or decrease each stat neccesary depending on the diff between the current starting
+    // level stats
+
+    eprintln!("called backend starter class change");
+    payload
+        .current_stats
+        .change_stater_class(payload.target_starting_class);
+    Json(payload.current_stats)
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct UserChangeStartingClass {
+    target_starting_class: StartingClassType,
+    current_stats: stats::StatList,
+}
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum CoreStat {
@@ -62,7 +115,7 @@ pub enum Attack {
     Stamina,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub enum StartingClassType {
     Hero,
     Bandit,

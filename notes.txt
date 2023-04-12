@@ -1,3 +1,17 @@
+backend api endpoints:
+server       <----------------------------->       client
+                
+command: optimize
+      optimized statlist               statlist, weapon
+
+command: reset
+      starter class                    statlist
+
+command: change starter class
+      starter class, current statlist   statlist
+
+the main thing is that we should be sending stats
+
 how do we calculate a weapons ar?
 
 what are the item stats?

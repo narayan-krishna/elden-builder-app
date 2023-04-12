@@ -1,4 +1,5 @@
 use super::*;
+use serde::{Deserialize, Serialize};
 
 /// module provides a starting class struct which holds starting class stats
 mod starting_classes {
@@ -82,7 +83,7 @@ mod starting_classes {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub struct StatList {
     pub level: i32,
     pub vigor: i32,
@@ -138,8 +139,6 @@ impl StatList {
             arcane: stats_list[7],
             class,
         };
-
-        eprintln!("fails here!");
 
         stats.check_stats_match_starting_class()?;
 
@@ -203,7 +202,7 @@ impl StatList {
     /// i.e. if the starting class starts at level 7, the statlist cannot have a level less than 7.
     pub fn check_stats_match_starting_class(&self) -> Result<(), &'static str> {
         let err = Err("level of stats is beneath starter level. this cannot happen");
-        let starting_class = dbg!(Self::from_starting_class(self.class));
+        let starting_class = Self::from_starting_class(self.class);
         if starting_class.level > self.level {
             return err;
         }
@@ -244,8 +243,16 @@ impl StatList {
     pub fn change_stat(&mut self, stat: CoreStat, val: i32) -> Result<(), &'static str> {
         let starter_class_stats = Self::from_starting_class(self.class);
         if val < starter_class_stats[stat] {
-            eprintln!("new val: {:?} is less than starter class stat: {:?}", val, starter_class_stats[stat]);
+            eprintln!(
+                "new val: {:?} is less than starter class stat: {:?}",
+                val, starter_class_stats[stat]
+            );
             return Err("stat cannot be lower than starting class stat");
+        }
+
+        if val > 99 {
+            eprintln!("stat is greater than 99, stat cannot be greater than 99");
+            return Err("stat cannot be greater than 99");
         }
 
         let diff = self[stat] - val;
@@ -253,9 +260,33 @@ impl StatList {
         self[stat] = val;
 
         eprintln!("the new level is: {}", self.level);
-        eprintln!("the stat is: {} (used to be: {})", self[stat], self[stat] + diff);
+        eprintln!(
+            "the stat is: {} (used to be: {})",
+            self[stat],
+            self[stat] + diff
+        );
 
         Ok(())
+    }
+
+    pub fn change_stater_class(&mut self, target_class: StartingClassType) {
+        let target_stats = Self::from_starting_class(target_class);
+        let current_starter_class_stats = Self::from_starting_class(self.class);
+
+        for stat in CoreStat::iter_scalings() {
+            let target_stat = target_stats[stat];
+            let current_stat = self[stat];
+            let current_starter_stat = current_starter_class_stats[stat];
+
+            let diff = target_stat - current_starter_stat;
+            if current_stat == current_starter_stat {
+                self[stat] = target_stat;
+            }
+
+            self.level += diff;
+        }
+
+        self.class = target_class;
     }
 }
 
@@ -462,5 +493,50 @@ mod tests {
         .expect("failed to create stats");
 
         assert!(stats.change_stat(CoreStat::Vig, 30).is_ok());
+    }
+
+    #[test]
+    fn try_change_starting_class() {
+        let mut stats = stats::StatList::from_slice_with_class_check(
+            [60, 15, 40, 11, 14, 14, 6, 9],
+            150,
+            StartingClassType::Prisoner,
+        )
+        .expect("failed to create stats");
+
+        let expected_stats = stats::StatList::from_slice_with_class_check(
+            [60, 15, 40, 8, 12, 16, 7, 9],
+            148,
+            StartingClassType::Astrologer,
+        )
+        .expect("failed to create stats");
+
+        stats.change_stater_class(StartingClassType::Astrologer);
+        dbg!(&stats);
+
+        assert_eq!(stats, expected_stats);
+    }
+
+    #[test]
+    fn try_change_starting_class_same_class() {
+        let mut stats = stats::StatList::from_slice_with_class_check(
+            [60, 15, 40, 11, 14, 14, 6, 9],
+            150,
+            StartingClassType::Prisoner,
+        )
+        .expect("failed to create stats");
+
+        let expected_stats = stats::StatList::from_slice_with_class_check(
+            [60, 15, 40, 11, 14, 14, 6, 9],
+            150,
+            StartingClassType::Prisoner,
+        )
+        .expect("failed to create stats");
+
+
+        stats.change_stater_class(StartingClassType::Prisoner);
+        dbg!(&stats);
+
+        assert_eq!(stats, expected_stats);
     }
 }

@@ -1,6 +1,6 @@
-use weapons::ar_calculator::csv_parsing;
-
 use super::*;
+use std::path::Path;
+use weapons::ar_calculator::csv_parsing;
 
 #[derive(Debug)]
 pub struct Weapon {
@@ -192,7 +192,11 @@ impl Weapon {
 
 impl Display for Weapon {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "\nweapon name: {}\nupgrade level: {}\n", self.name, self.upgrade_lvl)
+        write!(
+            f,
+            "\nweapon name: {}\nupgrade level: {}\n",
+            self.name, self.upgrade_lvl
+        )
     }
 }
 
