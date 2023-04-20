@@ -7,7 +7,7 @@ use std::path::Path;
 pub fn get_attack_element_param(
     attack_element_correct_id: i32,
 ) -> Result<Vec<i32>, Box<dyn Error>> {
-    let path = Path::new("csv_data/AttackElementCorrectParam.csv");
+    let path = Path::new("csv/AttackElementCorrectParam.csv");
     let mut rdr = csv::Reader::from_path(path)?;
 
     let mut out: Vec<i32> = Vec::new();
@@ -37,7 +37,7 @@ pub fn get_attack_element_param(
 
 /// query the csv for modifiers depending on the upgrade
 pub fn get_reinforce_param_modifier(reinforce_param_id: i32) -> Result<Vec<f32>, Box<dyn Error>> {
-    let path = Path::new("csv_data/ReinforceParamWeapon.csv");
+    let path = Path::new("csv/ReinforceParamWeapon.csv");
     let mut rdr = csv::Reader::from_path(path)?;
 
     let mut out: Vec<f32> = Vec::new();
@@ -68,7 +68,7 @@ pub fn get_reinforce_param_modifier(reinforce_param_id: i32) -> Result<Vec<f32>,
 
 /// query the csv to get the calc correct graph
 pub fn get_calc_correct_graph_ids(weapon_name: &str) -> Result<Vec<i32>, Box<dyn Error>> {
-    let path = Path::new("csv_data/CalcCorrectGraphID.csv");
+    let path = Path::new("csv/CalcCorrectGraphID.csv");
     let mut rdr = csv::Reader::from_path(path)?;
 
     let mut out: Vec<i32> = Vec::new();
@@ -101,7 +101,7 @@ pub fn get_calc_correct_graph_ids(weapon_name: &str) -> Result<Vec<i32>, Box<dyn
 pub fn get_calc_correct_graphs(
     calc_correct_ids: &Vec<i32>,
 ) -> Result<HashMap<i32, Vec<f32>>, Box<dyn Error>> {
-    let path = Path::new("csv_data/CalcCorrectGraph.csv");
+    let path = Path::new("csv/CalcCorrectGraph.csv");
     let mut rdr = csv::Reader::from_path(path)?;
 
     let mut calc_correct_graphs: HashMap<i32, Vec<f32>> = HashMap::new();

@@ -111,7 +111,7 @@ impl Weapon {
 
     /// build a weapon from the raw weapon data, given a name
     pub fn from_data(weapon_name: &str, upgrade_lvl: i32) -> Result<Weapon, Box<dyn Error>> {
-        let path = Path::new("csv_data/RawData.csv");
+        let path = Path::new("csv/RawData.csv");
         let mut rdr = csv::Reader::from_path(path)?;
         let mut stat_vals: Vec<f32> = Vec::new();
         let mut required_stats: Vec<i32> = Vec::new();
