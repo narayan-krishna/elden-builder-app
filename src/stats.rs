@@ -251,7 +251,7 @@ impl StatList {
         }
 
         if val > 99 {
-            eprintln!("stat is greater than 99, stat cannot be greater than 99");
+            // eprintln!("stat is greater than 99, stat cannot be greater than 99");
             return Err("stat cannot be greater than 99");
         }
 
@@ -269,7 +269,22 @@ impl StatList {
         Ok(())
     }
 
-    pub fn change_stater_class(&mut self, target_class: StartingClassType) {
+    pub fn change_level(&mut self, val: i32) -> Result<(), &'static str> {
+        if val < Self::from_starting_class(self.class).level {
+            return Err("level cannot be lower than starting class level");
+        }
+
+        let lvl_cap = 713;
+        if val > lvl_cap {
+            return Err("level cannot be higher than cap, 713");
+        }
+
+        self.level = val;
+
+        Ok(())
+    }
+
+    pub fn change_starter_class(&mut self, target_class: StartingClassType) {
         let target_stats = Self::from_starting_class(target_class);
         let current_starter_class_stats = Self::from_starting_class(self.class);
 
@@ -511,7 +526,7 @@ mod tests {
         )
         .expect("failed to create stats");
 
-        stats.change_stater_class(StartingClassType::Astrologer);
+        stats.change_starter_class(StartingClassType::Astrologer);
         dbg!(&stats);
 
         assert_eq!(stats, expected_stats);
@@ -534,9 +549,46 @@ mod tests {
         .expect("failed to create stats");
 
 
-        stats.change_stater_class(StartingClassType::Prisoner);
+        stats.change_starter_class(StartingClassType::Prisoner);
         dbg!(&stats);
 
         assert_eq!(stats, expected_stats);
+    }
+
+    #[test]
+    fn change_level_valid() {
+        let target_lvl = 45;
+        let mut stats = stats::StatList::from_starting_class(StartingClassType::Wretch);
+
+        let expected_stats = stats::StatList::from_slice_with_class_check(
+            [10, 10, 10, 10, 10, 10, 10, 10],
+            45,
+            StartingClassType::Wretch,
+        )
+        .expect("failed to create stats");
+
+        stats.change_level(target_lvl).expect("failed to change level");
+        dbg!(&stats);
+        assert_eq!(stats, expected_stats);
+    }
+
+    #[test]
+    fn change_level_below_min_invalid() {
+        let target_lvl = 8;
+        let mut stats = stats::StatList::from_starting_class(StartingClassType::Prisoner);
+        assert_eq!(
+            stats.change_level(target_lvl).err(),
+            Some("level cannot be lower than starting class level")
+        );
+    }
+
+    #[test]
+    fn change_level_above_cap_invalid() {
+        let target_lvl = 714;
+        let mut stats = stats::StatList::from_starting_class(StartingClassType::Wretch);
+        assert_eq!(
+            stats.change_level(target_lvl).err(),
+            Some("level cannot be higher than cap, 713")
+        );
     }
 }

@@ -89,8 +89,6 @@ fn dmg_type_per_stat(base_attack: f32, weapon_scaling: f32, calc_correct_result:
     base_attack * (weapon_scaling / 100.0) * (calc_correct_result / 100.0)
 }
 
-// TODO: change this to take graph as a 2d array where rows are stat, growth, exp and cols are values
-/// calculate the calc correct value for a certain  stat input
 pub fn calc_correct(input: i32, graph: &Vec<f32>) -> f32 {
     if input == 0 {
         return 0.0;

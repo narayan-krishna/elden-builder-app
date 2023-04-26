@@ -45,20 +45,31 @@ pub async fn get_reset_statlist(Json(payload): Json<UserTargetStartingClass>) ->
     Json(statlist)
 }
 
-// TODO: change this to return FullStatList
+// TODO: change this to return FullStatList or not?
 pub async fn change_starter_class(
     Json(mut payload): Json<UserChangeStartingClass>,
-) -> Json<stats::StatList> {
-// this needs to receive a new addition
-    // some logic for reducing or increasing stats as neccesary to a new starter class type
-    // increase or decrease each stat neccesary depending on the diff between the current starting
-    // level stats
-
+) -> Json<FullStatlist> {
     eprintln!("called backend starter class change");
-    payload
-        .current_stats
-        .change_stater_class(payload.target_starting_class);
-    Json(payload.current_stats)
+    payload.current_stats.change_starter_class(payload.target_starting_class);
+
+    let full_stat_list = FullStatlist {
+        current_stats: payload.current_stats,
+        min_stats: stats::StatList::from_starting_class(payload.target_starting_class),
+    };
+
+    Json(full_stat_list)
+}
+
+pub async fn provide_weapon_data(Json(payload): Json<WeaponName>) -> Json<weapons::Weapon> {
+    eprintln!("called backend get weapon data");
+    let wpn = weapons::Weapon::from_data(&payload.name, 1).expect("failed to create weapon");
+
+    Json(wpn)
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct WeaponName {
+    name: String,
 }
 
 #[derive(Serialize, Deserialize)]

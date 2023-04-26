@@ -13,9 +13,10 @@ async fn main() {
         .route("/stats", get(elden_builder_app::get_statlist))
         .route("/optimize", post(elden_builder_app::get_optimized_statlist))
         .route("/reset", post(elden_builder_app::get_reset_statlist))
+        .route("/weapon_data", post(elden_builder_app::provide_weapon_data))
         .route(
             "/change_starter_class",
-            post(elden_builder_app::change_starter_class),
+            post(elden_builder_app::change_starter_class)
         );
 
     println!(

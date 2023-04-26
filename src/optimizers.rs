@@ -30,7 +30,11 @@ pub fn optimize_statlist_for_weapon(
         let mut local_max = max_ar;
         for scaling in &relevant_scaling_stats {
             let mut temp_statlist = optimized_statlist.clone();
-            temp_statlist[*scaling] += 1;
+            // temp_statlist[*scaling] += 1;
+
+            if let Err(e) = temp_statlist.change_stat(*scaling, temp_statlist[*scaling] + 1) {
+                eprintln!("{}", e);
+            }
 
             let new_ar = ar_calculator::calculate_ar_core(
                 weapon,
@@ -125,6 +129,19 @@ mod tests {
 
         let weapon =
             weapons::Weapon::from_data("Vyke's War Spear", 10).expect("failed to creat weapon");
+
+        dbg!(optimize_statlist_for_weapon(&weapon, &stats).unwrap());
+    }
+ 
+    #[test]
+    fn chritty_greatsword_optimization() {
+        let stats = stats::StatList::from_slice_with_class_check(
+            [10, 10, 10, 10, 10, 10, 10, 10],
+            40,
+            StartingClassType::Wretch,
+        )
+        .expect("failed to create stats");
+        let weapon = weapons::Weapon::from_data("Greatsword", 1).expect("failed to create weapon");
 
         dbg!(optimize_statlist_for_weapon(&weapon, &stats).unwrap());
     }

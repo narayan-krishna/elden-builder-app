@@ -2,16 +2,23 @@ use super::*;
 use std::path::Path;
 use weapons::ar_calculator::csv_parsing;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Weapon {
     pub name: String,
     pub upgrade_lvl: i32,
+    #[serde(skip)]
     pub reinforce_param_id: i32,
+    #[serde(skip)]
     pub attack_element_correct_id: i32,
+    #[serde(rename = "max_upgrade_lvl")]
     pub max_upgrade: i32,
+    #[serde(skip)]
     stat_vals: Vec<f32>,
+    #[serde(skip)]
     scaling_vals: Vec<f32>,
+    #[serde(skip)]
     modifiers: Vec<f32>,
+    #[serde(skip)]
     required_stats: Vec<i32>,
 }
 
