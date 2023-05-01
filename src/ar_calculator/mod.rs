@@ -1,4 +1,5 @@
 pub mod csv_parsing;
+pub mod db_utils;
 use std::collections::HashMap;
 
 use super::*;
@@ -237,6 +238,26 @@ mod tests {
         let ruins_gs_ar = calculate_ar(&ruins_gs_0, &stats).unwrap();
         assert_eq!(ruins_gs_ar, 247.0);
     }
+
+    #[test]
+    fn keen_dagger_0_ar() {
+        let stats = StatList {
+            level: 10,
+            vigor: 10,
+            mind: 10,
+            endurance: 10,
+            strength: 50,
+            dexterity: 14,
+            intelligence: 40,
+            faith: 10,
+            arcane: 10,
+            class: StartingClassType::Hero,
+        };
+
+        let keen_dagger_0 = dbg!(Weapon::from_data("Keen Dagger", 0).unwrap());
+        calculate_ar(&keen_dagger_0, &stats).unwrap();
+    }
+
 
     #[test]
     fn ruins_gs_5_wretch_stats() { 

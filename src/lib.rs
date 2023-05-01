@@ -28,11 +28,11 @@ pub async fn get_statlist() -> Json<stats::StatList> {
     Json(statlist)
 }
 
-pub async fn get_optimized_statlist(Json(payload): Json<stats::StatList>) -> Json<stats::StatList> {
+pub async fn get_optimized_statlist(Json(payload): Json<OptimizationPayload>) -> Json<stats::StatList> {
 //TODO: this needs to take a weapon in addition to stats. for now we'll create a weapon here
     eprintln!("called backend statlist optimization");
-    let ruins_gs_5 = weapons::Weapon::from_data("Ruins Greatsword", 5).unwrap();
-    let statlist = optimizers::optimize_statlist_for_weapon(&ruins_gs_5, &payload).unwrap();
+    let weapon = weapons::Weapon::from_data(&payload.weapon_name, payload.upgrade_lvl).unwrap();
+    let statlist = optimizers::optimize_statlist_for_weapon(&weapon, &payload.current_stats).unwrap();
 
     Json(statlist)
 }
@@ -88,6 +88,13 @@ pub struct UserTargetStartingClass {
 pub struct FullStatlist {
     current_stats: stats::StatList,
     min_stats: stats::StatList,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct OptimizationPayload {
+    weapon_name: String,
+    upgrade_lvl: i32,
+    current_stats: stats::StatList,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]

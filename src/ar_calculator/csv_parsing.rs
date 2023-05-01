@@ -103,11 +103,16 @@ pub fn get_calc_correct_graphs(
 ) -> Result<HashMap<i32, Vec<f32>>, Box<dyn Error>> {
     let path = Path::new("csv/CalcCorrectGraph.csv");
     let mut rdr = csv::Reader::from_path(path)?;
+    dbg!(calc_correct_ids);
 
     let mut calc_correct_graphs: HashMap<i32, Vec<f32>> = HashMap::new();
 
-    for id in calc_correct_ids {
+    let mut calc_correct_ids_sorted: Vec<i32> = calc_correct_ids.to_vec();
+    calc_correct_ids_sorted.sort();
+
+    for id in calc_correct_ids_sorted {
         if calc_correct_graphs.get(&id).is_none() {
+            eprintln!("{}", id);
             for result in rdr.records() {
                 let record = result?;
                 if record.get(0).unwrap() == id.to_string() {
@@ -122,14 +127,14 @@ pub fn get_calc_correct_graphs(
                         })
                         .collect();
 
-                    calc_correct_graphs.insert(*id, graph);
+                    calc_correct_graphs.insert(id, graph);
 
                     break;
                 }
             }
 
             if rdr.is_done() {
-                return Err("failed to get calc correct graph".into());
+                return Err(format!("failed to get calc correct graph on id: {}", id).into());
             }
         }
     }

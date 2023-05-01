@@ -6,11 +6,10 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
-import { change_starter_class, reset, get_stats, optimize } from '../services/stats'
+import { change_starter_class, reset, } from '../services/stats'
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 import Button from '@mui/material/Button'
-import commmonStyles from './common'
 
 const commonStyles = {
   bgcolor: 'background.paper',
@@ -21,7 +20,8 @@ const commonStyles = {
   // height: '5rem',
 };
 
-const Stats = {
+export const Stats = {
+  level: "Level",
   vigor: "Vigor",
   mind: "Mind",
   endurance: "Endurance",
@@ -31,6 +31,7 @@ const Stats = {
   faith: "Faith",
   arcane: "Arcane",
 }
+
 // TODO: this should be called by the change class function everytime
 function ClassSelector(props) {
   const handleClassChange = (event) => {
@@ -66,7 +67,9 @@ function ClassSelector(props) {
 function IncrementerField(props) {
   const handleLeave = (event) => {
     // if the field is left blank, or is below the minimum or above max
-    if (event.target.value === "" || parseInt(event.target.value) < props.min || parseInt(event.target.value) > props.max) {
+    if (event.target.value === "" || 
+        parseInt(event.target.value) < props.min || 
+        parseInt(event.target.value) > props.max) {
       console.log("invalid stat, reverted to:", props.target_stat)
       // TODO: spawn an error here for the user
       event.target.value = props.target_stat
@@ -74,6 +77,13 @@ function IncrementerField(props) {
 
     console.log(props.stat)
     switch (props.stat) {
+      case Stats.level:
+        console.log("select level")
+        props.setStatListData(currVal => ({
+          ...currVal,
+          level: parseInt(event.target.value)
+        }))
+        break;
       case Stats.vigor:
         console.log("select vigor")
         props.setStatListData(currVal => ({
@@ -189,27 +199,8 @@ LevelIncrementer.defaultProps = {
 // statlist component
 // users should be able to change the props entered here. BUT they should not go beyond starter class
 function StatList(props) {
-  const [statListData, setStatListData] = useState({
-    level: 150,
-    vigor: 43,
-    mind: 15,
-    endurance: 40,
-    strength: 11,
-    dexterity: 17,
-    intelligence: 18,
-    faith: 6,
-    arcane: 9,
-    class: "Prisoner",
-    min_level: 9,
-    min_vigor: 11,
-    min_mind: 12,
-    min_endurance: 11,
-    min_strength: 11,
-    min_dexterity: 14,
-    min_intelligence: 14,
-    min_faith: 6,
-    min_arcane: 9,
-  })
+  var statListData = props.statListData
+  var setStatListData = props.setStatListData
 
   return (
     statListData && <div>
@@ -234,6 +225,14 @@ function StatList(props) {
           <ClassSelector 
             statListData={statListData} 
             setStatListData={setStatListData}
+          />
+          <LevelIncrementer 
+            stat={Stats.level}
+            target_stat={statListData.level}
+            max={713}
+            min={statListData.min_level}
+            setStatListData={setStatListData}
+            statListData={statListData} 
           />
           {/*has individual size components*/}
           <LevelIncrementer 

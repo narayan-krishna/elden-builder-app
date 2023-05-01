@@ -90,26 +90,30 @@ export function reset(statListData, setStatListData) {
 }
 
 // needs to use props
-export function optimize(statListData, setStatListData, weaponData, setWeaponData) {
+export function optimize(statListData, weaponData, setOptimizedData) {
   axios({
     method: "POST",
     url: "/optimize",
     data: {
-      level: statListData.level,
-      vigor: statListData.vigor,
-      mind: statListData.mind,
-      endurance: statListData.endurance,
-      strength: statListData.strength,
-      dexterity: statListData.dexterity,
-      intelligence: statListData.intelligence,
-      faith: statListData.faith,
-      arcane: statListData.arcane,
-      class: statListData.class,
+      weapon_name: weaponData.name,
+      upgrade_lvl: weaponData.upgrade_lvl,
+      current_stats: {
+        level: statListData.level,
+        vigor: statListData.vigor,
+        mind: statListData.mind,
+        endurance: statListData.endurance,
+        strength: statListData.strength,
+        dexterity: statListData.dexterity,
+        intelligence: statListData.intelligence,
+        faith: statListData.faith,
+        arcane: statListData.arcane,
+        class: statListData.class,
+      },
     }
   })
   .then((response) => {
     const res = response.data
-    setStatListData(({
+    setOptimizedData(({
       level: res.level,
       vigor: res.vigor,
       mind: res.mind,

@@ -66,6 +66,6 @@ export default function LevelIncrementer(props) {
 }
 
 LevelIncrementer.defaultProps = {
-  min: 1,
+  min: 0,
   max: 99,
 }

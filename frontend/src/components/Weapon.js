@@ -1,16 +1,11 @@
 import Box from "@mui/material/Box";
-import commonStyles from './common'
-import { useState } from 'react';
 import VirtualAutocomplete from './VirtualAutocomplete';
 import Stack from "@mui/material/Stack";
 import LevelIncrementer from "./Incrementer"
 
-function WeaponBox() {
-  const [weaponData, setWeaponData] = useState({
-    name: "Ruins Greatsword",
-    upgrade_lvl: 5,
-    max_upgrade_lvl: 10,
-  })
+function WeaponBox(props) {
+  var weaponData = props.weaponData
+  var setWeaponData = props.setWeaponData
 
   return (
     <div>
