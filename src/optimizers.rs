@@ -1,5 +1,5 @@
 use super::*;
-use ar_calculator::csv_parsing;
+use ar_calculator::db_utils;
 
 /// optimize the given statlist for a given weapon within a given amoutn of level points and return it as a new statlist
 pub fn optimize_statlist_for_weapon(
@@ -9,12 +9,14 @@ pub fn optimize_statlist_for_weapon(
     let mut optimized_statlist =
         stats::StatList::push_stats_to_weapon_requirement(statlist.clone(), weapon)?;
 
+    let operations = db_utils::Operations::new();
+
     let unspent_levels = dbg!(optimized_statlist.get_unspent_levels()?);
     let relevant_scaling_stats = weapon.get_non_zero_attack_stats();
     let attack_element_param =
-        csv_parsing::get_attack_element_param(weapon.attack_element_correct_id)?;
-    let calc_correct_ids = csv_parsing::get_calc_correct_graph_ids(&weapon.name)?;
-    let calc_correct_graphs = csv_parsing::get_calc_correct_graphs(&calc_correct_ids)?;
+        operations.get_attack_element_param(weapon.attack_element_correct_id)?;
+    let calc_correct_ids = operations.get_calc_correct_graph_ids(&weapon.name)?;
+    let calc_correct_graphs = operations.get_calc_correct_graphs(&calc_correct_ids)?;
 
     let mut max_ar: f32 = ar_calculator::calculate_ar_core(
         weapon,
@@ -132,7 +134,7 @@ mod tests {
 
         dbg!(optimize_statlist_for_weapon(&weapon, &stats).unwrap());
     }
- 
+
     #[test]
     fn chritty_greatsword_optimization() {
         let stats = stats::StatList::from_slice_with_class_check(

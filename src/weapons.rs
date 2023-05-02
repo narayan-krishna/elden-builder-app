@@ -1,6 +1,5 @@
 use super::*;
-use std::path::Path;
-use weapons::ar_calculator::csv_parsing;
+use weapons::ar_calculator::db_utils;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Weapon {
@@ -107,7 +106,8 @@ impl Weapon {
 
         self.upgrade_lvl = upgrade_lvl;
 
-        match csv_parsing::get_reinforce_param_modifier(self.reinforce_param_id + upgrade_lvl) {
+        let operations = db_utils::Operations::new();
+        match operations.get_reinforce_param_modifier(self.reinforce_param_id + upgrade_lvl) {
             Ok(modifiers) => {
                 self.modifiers = modifiers;
                 Ok(())
@@ -118,13 +118,6 @@ impl Weapon {
 
     /// build a weapon from the raw weapon data, given a name
     pub fn from_data(weapon_name: &str, upgrade_lvl: i32) -> Result<Weapon, Box<dyn Error>> {
-        let path = Path::new("csv/RawData.csv");
-        let mut rdr = csv::Reader::from_path(path)?;
-        let mut stat_vals: Vec<f32> = Vec::new();
-        let mut required_stats: Vec<i32> = Vec::new();
-        let mut scaling_vals: Vec<f32> = Vec::new();
-
-        let name_pos = 1;
         let reinforce_param_pos = 2;
         let attack_element_correct_id_pos = 26;
         let max_upgrade_pos = 28;
@@ -132,56 +125,32 @@ impl Weapon {
         let scaling_range = (9, 14);
         let required_stat_range = (29, 34);
 
-        let mut reinforce_param_id = 0;
-        let mut attack_element_correct_id = 0;
-        let mut max_upgrade = 0;
+        let operations = db_utils::Operations::new();
+        let raw_weapon_data = operations.get_raw_weapon_data(weapon_name)?;
 
-        for result in rdr.records() {
-            let record = result?;
-            if record.get(name_pos).unwrap() == weapon_name.to_string() {
-                reinforce_param_id = record.get(reinforce_param_pos).unwrap().parse()?;
-                attack_element_correct_id =
-                    record.get(attack_element_correct_id_pos).unwrap().parse()?;
-                max_upgrade = record.get(max_upgrade_pos).unwrap().parse()?;
-                stat_vals = (stat_range.0..stat_range.1)
-                    .map(|i| {
-                        record
-                            .get(i)
-                            .unwrap()
-                            .parse()
-                            .expect("failed to translate entry to number")
-                    })
-                    .collect();
+        let reinforce_param_id = raw_weapon_data[reinforce_param_pos].parse::<i32>()?;
+        let attack_element_correct_id =
+            raw_weapon_data[attack_element_correct_id_pos].parse::<i32>()?;
+        let max_upgrade = raw_weapon_data[max_upgrade_pos].parse::<i32>()?;
 
-                scaling_vals = (scaling_range.0..scaling_range.1)
-                    .map(|i| {
-                        record
-                            .get(i)
-                            .unwrap()
-                            .parse()
-                            .expect("failed to translate entry to number")
-                    })
-                    .collect();
+        let stat_vals = (stat_range.0..stat_range.1)
+            .map(|i| raw_weapon_data[i].parse::<f32>().unwrap())
+            .collect::<Vec<f32>>();
 
-                required_stats = (required_stat_range.0..required_stat_range.1)
-                    .map(|i| {
-                        record
-                            .get(i)
-                            .unwrap()
-                            .parse()
-                            .expect("failed to translate entry to number")
-                    })
-                    .collect();
-                break;
-            }
-        }
+        let scaling_vals = (scaling_range.0..scaling_range.1)
+            .map(|i| raw_weapon_data[i].parse::<f32>().unwrap())
+            .collect::<Vec<f32>>();
 
-        if rdr.is_done() {
-            return Err("failed to find weapon".into());
-        }
+        let required_stats = (required_stat_range.0..required_stat_range.1)
+            .map(|i| raw_weapon_data[i].parse::<i32>().unwrap())
+            .collect::<Vec<i32>>();
 
         let modifiers =
-            csv_parsing::get_reinforce_param_modifier(reinforce_param_id + upgrade_lvl)?;
+            operations.get_reinforce_param_modifier(reinforce_param_id + upgrade_lvl)?;
+
+        if upgrade_lvl > max_upgrade {
+            return Err("upgrade level is invalid".into());
+        }
 
         Ok(Weapon {
             name: weapon_name.to_string(),

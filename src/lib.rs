@@ -28,16 +28,21 @@ pub async fn get_statlist() -> Json<stats::StatList> {
     Json(statlist)
 }
 
-pub async fn get_optimized_statlist(Json(payload): Json<OptimizationPayload>) -> Json<stats::StatList> {
-//TODO: this needs to take a weapon in addition to stats. for now we'll create a weapon here
+pub async fn get_optimized_statlist(
+    Json(payload): Json<OptimizationPayload>,
+) -> Json<stats::StatList> {
+    //TODO: this needs to take a weapon in addition to stats. for now we'll create a weapon here
     eprintln!("called backend statlist optimization");
     let weapon = weapons::Weapon::from_data(&payload.weapon_name, payload.upgrade_lvl).unwrap();
-    let statlist = optimizers::optimize_statlist_for_weapon(&weapon, &payload.current_stats).unwrap();
+    let statlist =
+        optimizers::optimize_statlist_for_weapon(&weapon, &payload.current_stats).unwrap();
 
     Json(statlist)
 }
 
-pub async fn get_reset_statlist(Json(payload): Json<UserTargetStartingClass>) -> Json<stats::StatList> {
+pub async fn get_reset_statlist(
+    Json(payload): Json<UserTargetStartingClass>,
+) -> Json<stats::StatList> {
     // repurpose to be this to be more generalized getting starting class stats
     eprintln!("called backend statlist reset, changed_reset");
     let statlist = stats::StatList::from_starting_class(payload.target_starting_class);
@@ -50,7 +55,9 @@ pub async fn change_starter_class(
     Json(mut payload): Json<UserChangeStartingClass>,
 ) -> Json<FullStatlist> {
     eprintln!("called backend starter class change");
-    payload.current_stats.change_starter_class(payload.target_starting_class);
+    payload
+        .current_stats
+        .change_starter_class(payload.target_starting_class);
 
     let full_stat_list = FullStatlist {
         current_stats: payload.current_stats,
@@ -74,7 +81,7 @@ pub struct WeaponName {
 
 #[derive(Serialize, Deserialize)]
 pub struct UserChangeStartingClass {
-// these should probably be more general purpose
+    // these should probably be more general purpose
     target_starting_class: StartingClassType,
     current_stats: stats::StatList,
 }
@@ -84,7 +91,7 @@ pub struct UserTargetStartingClass {
     target_starting_class: StartingClassType,
 }
 
-#[derive(Serialize, Deserialize)] 
+#[derive(Serialize, Deserialize)]
 pub struct FullStatlist {
     current_stats: stats::StatList,
     min_stats: stats::StatList,

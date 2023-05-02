@@ -16,7 +16,7 @@ async fn main() {
         .route("/weapon_data", post(elden_builder_app::provide_weapon_data))
         .route(
             "/change_starter_class",
-            post(elden_builder_app::change_starter_class)
+            post(elden_builder_app::change_starter_class),
         );
 
     println!(

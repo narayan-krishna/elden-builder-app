@@ -1,4 +1,3 @@
-pub mod csv_parsing;
 pub mod db_utils;
 use std::collections::HashMap;
 
@@ -8,10 +7,12 @@ pub fn calculate_ar(
     weapon: &weapons::Weapon,
     statlist: &stats::StatList,
 ) -> Result<f32, Box<dyn Error>> {
+    let operations = db_utils::Operations::new();
+
     let attack_element_param =
-        csv_parsing::get_attack_element_param(weapon.attack_element_correct_id)?;
-    let calc_correct_ids = csv_parsing::get_calc_correct_graph_ids(&weapon.name)?;
-    let calc_correct_graphs = csv_parsing::get_calc_correct_graphs(&calc_correct_ids)?;
+        operations.get_attack_element_param(weapon.attack_element_correct_id)?;
+    let calc_correct_ids = operations.get_calc_correct_graph_ids(&weapon.name)?;
+    let calc_correct_graphs = operations.get_calc_correct_graphs(&calc_correct_ids)?;
 
     calculate_ar_core(
         weapon,
@@ -134,52 +135,6 @@ mod tests {
     use crate::weapons::Weapon;
 
     #[test]
-    fn valid_get_attack_element_param() {
-        let attack_element_param = csv_parsing::get_attack_element_param(10013).unwrap();
-        assert_eq!(
-            attack_element_param,
-            vec![1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0]
-        );
-    }
-
-    #[test]
-    fn valid_get_reinforce_param_modifier() {
-        let reinforce_param_modifier = csv_parsing::get_reinforce_param_modifier(402).unwrap();
-        assert_eq!(
-            reinforce_param_modifier,
-            vec![0.872, 0.872, 0.872, 0.872, 0.872, 1.08, 1.38, 0.56, 1.08, 1.08, 1.08]
-        )
-    }
-
-    #[test]
-    fn valid_get_calc_correct_graph_ids() {
-        let calc_correct_graph_ids =
-            csv_parsing::get_calc_correct_graph_ids("Miquellan Knight's Sword").unwrap();
-        assert_eq!(calc_correct_graph_ids, vec![0, 4, 0, 0, 4]);
-    }
-
-    #[test]
-    fn valid_get_calc_correct_graphs() {
-        let calc_correct_graph_ids = vec![0, 4, 0, 0, 4];
-        let calc_correct_graph =
-            csv_parsing::get_calc_correct_graphs(&calc_correct_graph_ids).unwrap();
-
-        assert_eq!(
-            calc_correct_graph.get(&0).unwrap(),
-            &vec![
-                1.0, 18.0, 60.0, 80.0, 150.0, 0.0, 25.0, 75.0, 90.0, 110.0, 1.2, -1.2, 1.0, 1.0,
-                1.0
-            ]
-        );
-        assert_eq!(
-            calc_correct_graph.get(&4).unwrap(),
-            &vec![
-                1.0, 20.0, 50.0, 80.0, 99.0, 0.0, 40.0, 80.0, 95.0, 100.0, 1.0, 1.0, 1.0, 1.0, 1.0
-            ]
-        );
-    }
-
-    #[test]
     fn cold_dagger_5_ar() {
         let stats = StatList {
             level: 10,
@@ -258,9 +213,8 @@ mod tests {
         calculate_ar(&keen_dagger_0, &stats).unwrap();
     }
 
-
     #[test]
-    fn ruins_gs_5_wretch_stats() { 
+    fn ruins_gs_5_wretch_stats() {
         // todo!()
     }
 }

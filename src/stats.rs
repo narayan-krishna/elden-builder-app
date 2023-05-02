@@ -548,7 +548,6 @@ mod tests {
         )
         .expect("failed to create stats");
 
-
         stats.change_starter_class(StartingClassType::Prisoner);
         dbg!(&stats);
 
@@ -567,7 +566,9 @@ mod tests {
         )
         .expect("failed to create stats");
 
-        stats.change_level(target_lvl).expect("failed to change level");
+        stats
+            .change_level(target_lvl)
+            .expect("failed to change level");
         dbg!(&stats);
         assert_eq!(stats, expected_stats);
     }
