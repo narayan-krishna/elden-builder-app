@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export function get_info(setProfileData) {
+export function get_info(setProfileData: React.SetStateAction<any>) {
   axios({
     method: "GET", 
     url: "/profile",

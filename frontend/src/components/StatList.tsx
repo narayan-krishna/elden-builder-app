@@ -8,8 +8,8 @@ import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import { change_starter_class, reset, } from '../services/stats'
 import Typography from '@mui/material/Typography';
-import { useState } from 'react';
 import Button from '@mui/material/Button'
+import { StatFullProps } from '../pages/Home';
 
 const commonStyles = {
   bgcolor: 'background.paper',
@@ -33,9 +33,9 @@ export const Stats = {
 }
 
 // TODO: this should be called by the change class function everytime
-function ClassSelector(props) {
-  const handleClassChange = (event) => {
-    change_starter_class(props.statListData, props.setStatListData, event.target.value)
+const ClassSelector: React.FC<StatFullProps> = ({ statListData, setStatListData }) => {
+  const handleClassChange = (event: any) => {
+    change_starter_class(statListData, setStatListData, event.target.value)
   }
 
   return (
@@ -44,7 +44,7 @@ function ClassSelector(props) {
       <Select
         labelId="demo-select-small-label"
         id="demo-select-small"
-        value={props.statListData.class}
+        value={statListData.class}
         label="Class"
         onChange={handleClassChange}
         style={{ height: "55px" }}
@@ -58,84 +58,88 @@ function ClassSelector(props) {
   );
 }
 
-// TODO: implement a local reset function
-// function reset() {
-//
-// }
+interface IncrementerProps {
+  target_stat: number;
+  stat: string;
+  min: number;
+  max: number;
+  key: React.Key;
+  statListProps: StatFullProps;
+}
 
 // this should be more general purpose
-function IncrementerField(props) {
-  const handleLeave = (event) => {
+const IncrementerField: React.FC<IncrementerProps> = ({ min, max, target_stat, stat, statListProps }) => {
+  const handleLeave = (event: any) => {
     // if the field is left blank, or is below the minimum or above max
     if (event.target.value === "" || 
-        parseInt(event.target.value) < props.min || 
-        parseInt(event.target.value) > props.max) {
-      console.log("invalid stat, reverted to:", props.target_stat)
+        parseInt(event.target.value) < min || 
+        parseInt(event.target.value) > max) {
+      console.log("invalid stat, reverted to:", target_stat)
       // TODO: spawn an error here for the user
-      event.target.value = props.target_stat
+      event.target.value = target_stat
     }
 
-    console.log(props.stat)
-    switch (props.stat) {
+    console.log(stat)
+    switch (stat) {
       case Stats.level:
         console.log("select level")
-        props.setStatListData(currVal => ({
+        statListProps.setStatListData(currVal => ({
           ...currVal,
           level: parseInt(event.target.value)
         }))
         break;
       case Stats.vigor:
         console.log("select vigor")
-        props.setStatListData(currVal => ({
+        statListProps.setStatListData(currVal => ({
           ...currVal,
           vigor: parseInt(event.target.value)
         }))
         break;
       case Stats.mind:
         console.log("select mind")
-        props.setStatListData(currVal => ({
+        statListProps.setStatListData(currVal => ({
           ...currVal,
           mind: parseInt(event.target.value)
         }))
         break;
       case Stats.endurance:
         console.log("select endurance")
-        props.setStatListData(currVal => ({
+        statListProps.setStatListData(currVal => ({
           ...currVal,
           endurance: parseInt(event.target.value)
         }))
         break;
       case Stats.strength:
         console.log("select strength")
-        props.setStatListData(currVal => ({
+        statListProps.setStatListData(currVal => ({
           ...currVal,
           strength: parseInt(event.target.value)
         }))
         break;
       case Stats.dexterity:
         console.log("select dexterity")
-        props.setStatListData(currVal => ({
+        statListProps.setStatListData(currVal => ({
           ...currVal,
           dexterity: parseInt(event.target.value)
         }))
         break;
       case Stats.intelligence:
         console.log("select intelligence")
-        props.setStatListData(currVal => ({
+        statListProps.setStatListData(currVal => ({
           ...currVal,
           intelligence: parseInt(event.target.value)
         }))
         break;
       case Stats.faith:
         console.log("select faith")
-        props.setStatListData(currVal => ({
+        statListProps.setStatListData(currVal => ({
           ...currVal,
           faith: parseInt(event.target.value)
         }))
         break;
       case Stats.arcane:
         console.log("select arcane")
-        props.setStatListData(currVal => ({
+        statListProps.setStatListData(currVal => ({
           ...currVal,
           arcane: parseInt(event.target.value)
         }))
@@ -150,8 +154,8 @@ function IncrementerField(props) {
         shrink: true,
       }}
       onBlur={handleLeave}
-      defaultValue={props.target_stat} // TODO: needs to be generic
-      onInput={(e) => {
+      defaultValue={target_stat} // TODO: needs to be generic
+      onInput={(e: any) => {
           e.target.value = e.target.value.replace(/[^0-9]/g, "")
       }}
       inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', style: { height: "17px", width: "46px" }}}
@@ -159,7 +163,15 @@ function IncrementerField(props) {
   );
 }
 
-function LevelIncrementer(props) {
+interface LevelIncrementerProps {
+  target_stat: number;
+  stat: string;
+  min?: number;
+  max?: number;
+  statListProps: StatFullProps;
+}
+
+const LevelIncrementer: React.FC<LevelIncrementerProps> = ({ target_stat, stat, min, max, statListProps }) => {
   // TODO: this should be a combination of a text field and a selector
   return (
     <Box
@@ -174,34 +186,26 @@ function LevelIncrementer(props) {
       <Stack direction="row" spacing={2}>
         <Box display="flex" justifyContent="left" alignItems="flex-end" sx={{flexGrow: 1, p: 0, }}>
           <div>
-            <Typography variant="body1">{props.stat}</Typography>
+            <Typography variant="body1">{stat}</Typography>
           </div>
         </Box>
         <IncrementerField
-          stat={props.stat}
-          target_stat={props.target_stat}
-          key={props.target_stat} // TODO: needs to be generic
-          setStatListData={props.setStatListData}
-          statListData={props.statListData}
-          min={props.min}
-          max={props.max}
+          stat={stat}
+          target_stat={target_stat}
+          key={target_stat} // TODO: needs to be generic
+          statListProps={statListProps}
+          min={min ? min : 0}
+          max={max ? max : 99}
         />
       </Stack>
     </Box>
   );
 }
 
-LevelIncrementer.defaultProps = {
-  min: 0,
-  max: 99,
-}
 
 // statlist component
 // users should be able to change the props entered here. BUT they should not go beyond starter class
-function StatList(props) {
-  var statListData = props.statListData
-  var setStatListData = props.setStatListData
-
+const StatList: React.FC<StatFullProps> = ({ statListData, setStatListData }) => {
   return (
     statListData && <div>
       <Box
@@ -231,65 +235,56 @@ function StatList(props) {
             target_stat={statListData.level}
             max={713}
             min={statListData.min_level}
-            setStatListData={setStatListData}
-            statListData={statListData} 
+            statListProps={{statListData, setStatListData}}
           />
           {/*has individual size components*/}
           <LevelIncrementer 
             stat={Stats.vigor}
             target_stat={statListData.vigor}
             min={statListData.min_vigor}
-            setStatListData={setStatListData}
-            statListData={statListData} 
+            statListProps={{statListData, setStatListData}}
           />
           <LevelIncrementer 
             stat={Stats.mind}
             target_stat={statListData.mind}
             min={statListData.min_mind}
-            setStatListData={setStatListData}
-            statListData={statListData} 
+            statListProps={{statListData, setStatListData}}
           />
           <LevelIncrementer 
             stat={Stats.endurance}
             target_stat={statListData.endurance}
             min={statListData.min_endurance}
-            setStatListData={setStatListData}
-            statListData={statListData} 
+            statListProps={{statListData, setStatListData}}
           />
           <LevelIncrementer 
             stat={Stats.strength}
             target_stat={statListData.strength}
             min={statListData.min_strength}
-            setStatListData={setStatListData}
-            statListData={statListData} 
+            statListProps={{statListData, setStatListData}}
           />
           <LevelIncrementer 
             stat={Stats.dexterity}
             target_stat={statListData.dexterity}
             min={statListData.min_dexterity}
-            setStatListData={setStatListData}
-            statListData={statListData} 
+            statListProps={{statListData, setStatListData}}
           />
           <LevelIncrementer 
             stat={Stats.intelligence}
             target_stat={statListData.intelligence}
             min={statListData.min_intelligence}
-            setStatListData={setStatListData}
-            statListData={statListData} 
+            statListProps={{statListData, setStatListData}}
           />
           <LevelIncrementer 
             stat={Stats.faith}
             target_stat={statListData.faith}
             min={statListData.min_faith}
-            setStatListData={setStatListData}
-            statListData={statListData} 
+            statListProps={{statListData, setStatListData}}
           />
           <LevelIncrementer 
             stat={Stats.arcane}
             target_stat={statListData.arcane}
             min={statListData.min_arcane}
-            setStatListData={setStatListData}
-            statListData={statListData} 
+            statListProps={{statListData, setStatListData}}
           />
           <Box
             sx={{

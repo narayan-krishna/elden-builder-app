@@ -259,12 +259,12 @@ impl StatList {
         self.level -= diff;
         self[stat] = val;
 
-        eprintln!("the new level is: {}", self.level);
-        eprintln!(
-            "the stat is: {} (used to be: {})",
-            self[stat],
-            self[stat] + diff
-        );
+        // eprintln!("the new level is: {}", self.level);
+        // eprintln!(
+        //     "the stat is: {} (used to be: {})",
+        //     self[stat],
+        //     self[stat] + diff
+        // );
 
         Ok(())
     }

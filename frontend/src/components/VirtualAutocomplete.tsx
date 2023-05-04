@@ -13,7 +13,7 @@ import get_weapon_data from '../services/weapon'
 
 const LISTBOX_PADDING = 8; // px
 
-function renderRow(props) {
+function renderRow(props: any) {
   const { data, index, style } = props;
   const dataSet = data[index];
   const inlineStyle = {
@@ -38,13 +38,13 @@ function renderRow(props) {
 
 const OuterElementContext = React.createContext({});
 
-const OuterElementType = React.forwardRef((props, ref) => {
+const OuterElementType = React.forwardRef((props: any, ref: any) => {
   const outerProps = React.useContext(OuterElementContext);
   return <div ref={ref} {...props} {...outerProps} />;
 });
 
-function useResetCache(data) {
-  const ref = React.useRef(null);
+function useResetCache(data: any) {
+  const ref: any = React.useRef(null);
   React.useEffect(() => {
     if (ref.current != null) {
       ref.current.resetAfterIndex(0, true);
@@ -54,10 +54,10 @@ function useResetCache(data) {
 }
 
 // Adapter for react-window
-const ListboxComponent = React.forwardRef(function ListboxComponent(props, ref) {
+const ListboxComponent = React.forwardRef(function ListboxComponent(props: any, ref: any) {
   const { children, ...other } = props;
-  const itemData = [];
-  children.forEach((item) => {
+  const itemData: any = [];
+  children.forEach((item: any) => {
     itemData.push(item);
     itemData.push(...(item.children || []));
   });
@@ -69,7 +69,7 @@ const ListboxComponent = React.forwardRef(function ListboxComponent(props, ref) 
   const itemCount = itemData.length;
   const itemSize = smUp ? 36 : 48;
 
-  const getChildSize = (child) => {
+  const getChildSize = (child: any) => {
     if (child.hasOwnProperty('group')) {
       return 48;
     }
@@ -81,7 +81,7 @@ const ListboxComponent = React.forwardRef(function ListboxComponent(props, ref) 
     if (itemCount > 8) {
       return 8 * itemSize;
     }
-    return itemData.map(getChildSize).reduce((a, b) => a + b, 0);
+    return itemData.map(getChildSize).reduce((a: any, b: any) => a + b, 0);
   };
 
   const gridRef = useResetCache(itemCount);
@@ -121,14 +121,14 @@ const StyledPopper = styled(Popper)({
   },
 });
 
-export default function Virtualize(props) {
+export default function Virtualize(props: any) {
   return (
     <Autocomplete
       id="virtualize-demo"
       sx={{ width: 350 }}
       disableListWrap
       // TODO: make on change a variable function
-      onChange={(event, newValue) => {
+      onChange={(event: any, newValue) => {
         if (newValue != null) {
           get_weapon_data(props.weaponData, props.setWeaponData, newValue)
         }
@@ -138,9 +138,9 @@ export default function Virtualize(props) {
       options={weapon_list}
       defaultValue={weapon_list[412]}
       renderInput={(params) => <TextField {...params} label="Weapon name" />}
-      renderOption={(props, option, state) => [props, option, state.index]}
+      renderOption={(props: any, option: any, state: any) => [props, option, state.index]}
       // TODO: Post React 18 update - validate this conversion, look like a hidden bug
-      renderGroup={(params) => params}
+      renderGroup={(params: any) => params}
     />
   );
 }

@@ -6,6 +6,8 @@ pub fn optimize_statlist_for_weapon(
     weapon: &weapons::Weapon,
     statlist: &stats::StatList,
 ) -> Result<stats::StatList, Box<dyn Error>> {
+    eprintln!("optimizing");
+    dbg!(&weapon);
     let mut optimized_statlist =
         stats::StatList::push_stats_to_weapon_requirement(statlist.clone(), weapon)?;
 
@@ -54,7 +56,7 @@ pub fn optimize_statlist_for_weapon(
             }
         }
 
-        eprintln!("Allocating a point into {:?}", allocation.unwrap());
+        // eprintln!("Allocating a point into {:?}", allocation.unwrap());
         if let Some(stat) = allocation {
             optimized_statlist[stat] += 1;
         } else {
@@ -65,7 +67,7 @@ pub fn optimize_statlist_for_weapon(
         allocation = None;
     }
 
-    Ok(optimized_statlist)
+    Ok(dbg!(optimized_statlist))
 }
 
 /// find the optimal character choice for a particular weapon, at a particular level.

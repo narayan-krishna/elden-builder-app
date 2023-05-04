@@ -1,11 +1,10 @@
 import Box from "@mui/material/Box";
 import VirtualAutocomplete from './VirtualAutocomplete';
 import Stack from "@mui/material/Stack";
-import LevelIncrementer from "./Incrementer"
+import { LevelIncrementer } from "./Incrementer"
+import { WeaponFullProps } from "../pages/Home"
 
-function WeaponBox(props) {
-  var weaponData = props.weaponData
-  var setWeaponData = props.setWeaponData
+const WeaponBox: React.FC<WeaponFullProps> = ({ weaponprops, setweaponprops }) => {
 
   return (
     <div>
@@ -26,13 +25,13 @@ function WeaponBox(props) {
         borderRight={1}
       >
         <Stack spacing={{ xs: .1, sm: 1.65 }} direction="column" useFlexGap flexWrap="wrap" alignItems="center" justifyContent="center">
-          <VirtualAutocomplete weaponData={weaponData} setWeaponData={setWeaponData}/>
+          <VirtualAutocomplete weaponData={weaponprops} setWeaponData={setweaponprops}/>
           <LevelIncrementer 
             stat={"Upgrade level"}
-            target_stat={weaponData.upgrade_lvl}
-            max={weaponData.max_upgrade_lvl}
-            data={weaponData}
-            setData={setWeaponData}
+            target_stat={weaponprops.upgrade_lvl}
+            max={weaponprops.max_upgrade_lvl}
+            data={weaponprops}
+            setData={setweaponprops}
           />
         </Stack>
       </Box>

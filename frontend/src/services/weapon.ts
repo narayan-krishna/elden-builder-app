@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { WeaponProps } from '../pages/Home';
 
-export function get_rand_weapon(weaponData, setWeaponData) {
+export function get_rand_weapon(setWeaponData: React.Dispatch<React.SetStateAction<WeaponProps>>) {
   console.log("called get weapon data")
   axios({
     method: "GET",
@@ -25,7 +26,8 @@ export function get_rand_weapon(weaponData, setWeaponData) {
   })
 }
 
-export default function get_weapon_data(weaponData, setWeaponData, weapon_name) {
+//BUG: cannot get rid of weaponData or breakage
+export default function get_weapon_data(weaponData: WeaponProps, setWeaponData: React.Dispatch<React.SetStateAction<WeaponProps>>, weapon_name: string) {
   console.log("called get weapon data using name", weapon_name)
   axios({
     method: "POST",

@@ -49,7 +49,7 @@ impl Operations {
                 .collect()
         }
 
-        Ok(dbg!(out))
+        Ok(out)
     }
 
     /// Queries the csv for modifiers depending on the upgrade
@@ -69,7 +69,7 @@ impl Operations {
                 .collect()
         }
 
-        Ok(dbg!(out))
+        Ok(out)
     }
 
     /// Queries the csv to get the calc correct graph
@@ -90,7 +90,7 @@ impl Operations {
                 .collect()
         }
 
-        Ok(dbg!(out))
+        Ok(out)
     }
 
     /// Queres the calc correct info given the id
@@ -126,7 +126,7 @@ impl Operations {
             calc_correct_graphs.insert(key, vals);
         }
 
-        Ok(dbg!(calc_correct_graphs))
+        Ok(calc_correct_graphs)
     }
 
     /// Returns a row of weapon data as strings which can be parsed as needed

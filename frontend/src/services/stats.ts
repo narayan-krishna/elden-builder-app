@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { StatListProps, WeaponProps, OptimizeDataProps } from '../pages/Home';
 
 // this needs the new min stats
-export function change_starter_class(statListData, setStatListData, target_class) {
+export function change_starter_class(statListData: StatListProps, setStatListData: React.Dispatch<React.SetStateAction<StatListProps>>, target_class: string) {
   axios({
     method: "POST",
     url: "/change_starter_class",
@@ -56,7 +57,7 @@ export function change_starter_class(statListData, setStatListData, target_class
 }
 
 // probably not needs, can simply reset to mins
-export function reset(statListData, setStatListData) {
+export function reset(statListData: StatListProps, setStatListData: React.Dispatch<React.SetStateAction<StatListProps>>) {
   console.log("resetting")
   axios({
     method: "POST",
@@ -67,7 +68,8 @@ export function reset(statListData, setStatListData) {
   })
   .then((response) => {
     const res = response.data
-    setStatListData(({
+    setStatListData(self => ({
+      ...self,
       level: res.level,
       vigor: res.vigor,
       mind: res.mind,
@@ -90,7 +92,7 @@ export function reset(statListData, setStatListData) {
 }
 
 // needs to use props
-export function optimize(statListData, weaponData, setOptimizedData) {
+export function optimize(statListData: StatListProps, weaponData: WeaponProps, setOptimizedData: React.Dispatch<React.SetStateAction<any>>) {
   axios({
     method: "POST",
     url: "/optimize",
@@ -136,7 +138,7 @@ export function optimize(statListData, weaponData, setOptimizedData) {
 }
 
 // this needs new min stats
-export function get_stats(setStatListData) {
+export function get_stats(setStatListData: React.Dispatch<React.SetStateAction<StatListProps>>) {
   console.log("called get stats")
   axios({
     method: "GET",
@@ -145,7 +147,8 @@ export function get_stats(setStatListData) {
   .then((response) => {
     const res = response.data
     console.log(res.level)
-    setStatListData(({
+    setStatListData(self => ({
+      ...self,
       level: res.level,
       vigor: res.vigor,
       mind: res.mind,

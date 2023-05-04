@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import StatList from '../components/StatList'
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
@@ -11,9 +11,60 @@ import NorthIcon from '@mui/icons-material/North';
 import './Home.css'
 import { optimize } from '../services/stats'
 
-const page_state = {
-  configuration: 0,
-  result: 1,
+export type StatListProps = {
+  level: number;
+  vigor: number;
+  mind: number;
+  endurance: number;
+  strength: number;
+  dexterity: number;
+  intelligence: number;
+  faith: number;
+  arcane: number;
+  class: string;
+  min_level: number;
+  min_vigor: number;
+  min_mind: number;
+  min_endurance: number;
+  min_strength: number;
+  min_dexterity: number;
+  min_intelligence: number;
+  min_faith: number;
+  min_arcane: number;
+};
+
+export type OptimizeDataProps = {
+  level: number;
+  vigor: number;
+  mind: number;
+  endurance: number;
+  strength: number;
+  dexterity: number;
+  intelligence: number;
+  faith: number;
+  arcane: number;
+  classtype: number;
+}
+
+export type WeaponProps = {
+  name: string;
+  upgrade_lvl: number;
+  max_upgrade_lvl: number;
+}
+
+export interface OptimizeListProps {
+  statlist: StatListProps;
+  optimizelist: OptimizeDataProps;
+}
+
+export interface WeaponFullProps {
+    weaponprops: WeaponProps;
+    setweaponprops: React.Dispatch<React.SetStateAction<WeaponProps>>
+}
+
+export interface StatFullProps {
+  statListData: StatListProps;
+  setStatListData: React.Dispatch<React.SetStateAction<StatListProps>>
 }
 
 function Home() {
@@ -46,35 +97,51 @@ function Home() {
   })
 
   const [optimizedData, setOptimizedData] = useState(null)
+
+  const page_state = {
+    configuration: 0,
+    result: 1,
+  };
+
   const [pageState, setPageState] = useState({
     state: page_state.configuration
   })
 
   function handleScrollDown() {
-    setPageState({
-      state: page_state.result
-    })
-    window.scroll({
-      top: document.body.offsetHeight,
-      left: 0, 
-      behavior: 'smooth',
-    });
+    if (pageState.state == page_state.configuration) {
+      setPageState({
+        state: page_state.result
+      })
+      window.scroll({
+        top: document.body.offsetHeight,
+        left: 0, 
+        behavior: 'smooth',
+      });
+    }
   }
 
   function handleScrollUp() {
-    setPageState({
-      state: page_state.configuration
-    })
-    window.scroll({
-      top: 0,
-      left: 0, 
-      behavior: 'smooth',
-    });
+    if (pageState.state == page_state.result) {
+      setPageState({
+        state: page_state.configuration
+      })
+      window.scroll({
+        top: 0,
+        left: 0, 
+        behavior: 'smooth',
+      });
+    }
   }
+
+  window.addEventListener('wheel', function(event: any) {
+    // some logic
+    event.preventDefault();
+  }, {passive:false});
 
   // TODO: make this its own page (setup/configuration) and make weapon and stat state global
   return (
     <div className="App">
+
       <Box
         minHeight='100vh'
         display="flex"
@@ -92,7 +159,7 @@ function Home() {
             <StatList statListData={statListData} setStatListData={setStatListData}/>
           </div>
           <div style={{display: 'flex', justifyContent:'center'}}>
-            <WeaponBox weaponData={weaponData} setWeaponData={setWeaponData}/>
+            <WeaponBox weaponprops={weaponData} setweaponprops={setWeaponData}/>
           </div>
           <Box
             display='flex'
@@ -117,7 +184,9 @@ function Home() {
         justifyContent="center"
         alignItems="center"
       >
-        <OptimizedList optimizedData={optimizedData} statListData={statListData}/>
+        {optimizedData &&
+          <OptimizedList statlist={statListData} optimizelist={optimizedData}/>
+        }
       </Box>
 
       {optimizedData && pageState.state == page_state.configuration && <div className="mybutton">
