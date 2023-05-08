@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "./static/css/main.f47244f1.css",
-    "main.js": "./static/js/main.b63ce4bd.js",
-    "static/js/787.cda612ba.chunk.js": "./static/js/787.cda612ba.chunk.js",
-    "index.html": "./index.html",
-    "main.f47244f1.css.map": "./static/css/main.f47244f1.css.map",
-    "main.b63ce4bd.js.map": "./static/js/main.b63ce4bd.js.map",
-    "787.cda612ba.chunk.js.map": "./static/js/787.cda612ba.chunk.js.map"
+    "main.css": "/elden-builder-app/static/css/main.f47244f1.css",
+    "main.js": "/elden-builder-app/static/js/main.7626180c.js",
+    "static/js/787.cda612ba.chunk.js": "/elden-builder-app/static/js/787.cda612ba.chunk.js",
+    "index.html": "/elden-builder-app/index.html",
+    "main.f47244f1.css.map": "/elden-builder-app/static/css/main.f47244f1.css.map",
+    "main.7626180c.js.map": "/elden-builder-app/static/js/main.7626180c.js.map",
+    "787.cda612ba.chunk.js.map": "/elden-builder-app/static/js/787.cda612ba.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.f47244f1.css",
-    "static/js/main.b63ce4bd.js"
+    "static/js/main.7626180c.js"
   ]
 }
