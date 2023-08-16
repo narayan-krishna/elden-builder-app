@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "proxy": "http://localhost:5000",
+  "homepage": "https://narayan-krishna.github.io/elden-builder-app",
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
@@ -25,6 +26,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "predeploy" : "npm run build",
+    "deploy" : "gh-pages -d build",
     "start": "react-scripts start",
     "start-backend": "cd .. && cargo run",
     "build": "react-scripts build",
