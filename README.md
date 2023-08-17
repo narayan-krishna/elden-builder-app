@@ -6,10 +6,10 @@ Are you tired of having to figure out which level to upgrade in Elden Ring? Are 
 
 Elden Builder is a web tool that allows you to enter your Elden Ring statlist, the weapon you want to use, and the level you're aiming for. Want to use Ruin's Greatsword, but you started Prisoner and already have a bunch of levels? Elden Builder will put you on the right track.
 
-### Enter your (desired) stats
+### Enter your (desired) stats:
 ![image info](./images/vyke_input.png)
 
-### See how you statlist is optimized
+### See how you statlist is optimized:
 ![image info](./images/vyke_results.png)
 
 ## Upcoming changes
